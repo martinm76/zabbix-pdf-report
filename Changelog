@@ -1,0 +1,125 @@
+2012-01-14  Travis Mathis <travisdmathis@gmail.com>
+	* v0.1
+	* Added Form Selection, Data Gathering, Report Generation w/basic time period selection
+	* pdfform.php(selection) / generatereport.php(report building) /pdf.php(report)i
+
+2012-02-07  Travis Mathis <travisdmathis@gmail.com>
+	* v0.2
+	* Removed mysql specific calls and replaced with API calls.
+	* config.inc.php: Moved config to central file
+
+2014-09-05  Ronny Pettersen <pettersen.ronny @ gmail.com>
+	* inc/: Moved included files to its own folder
+	* js/ : Created javascript (jquery) files in its own folder
+	* css/: Moved css files to its own folder. Added some of Zabbix CSS to
+	these.
+	* index.php: Rewrote all of "pdfform.php" and created it as just index.php. 
+	* index.php: Allows reporting on group. Uses GroupID and HostID from
+	Zabbix API (not name).
+	* index.php: Uses Jquery (javascript) for many of the functions on the index page.
+	* index.php: Uses Jquery Calendar to select range for custom timeframe
+	* index.php: Uses Jquery Selector2 where you can search in the select
+	box. Good for installations with many groups/hosts.
+	* createpdf.php: Merged and rewrote code for pdf.php and
+	generatedreport.php.
+	* createpdf.php: Stores created reports in reports subdirectory. Does
+	* createpdf.php: Added some sanitization with filter_input on some
+	_GET variables. Need to implement on more.
+	* inc/index.functions.php: Moved some common function in index.php to
+	an included file
+	* inc/createpdf.functions.php: Moved common function from createpdf.php
+
+2015-03-13  Martin Møller <mmo@pwc.dk>
+	* user.authenticate replaced with user.login. It seems that
+	user.authenticate died with 1.8.x and even 1.8.x. has user.login
+	* Started porting my trigger/acknowledgement implementation to this
+	version of the report.
+
+2015-03-14  Martin Møller <mmo@pwc.dk>
+	* Trigger/Acknowledgements pretty much working.
+	* Option to choose Graphs and/or Trigger data
+	* Initial work on user login and limit view of existing reports.
+	* Initial handling of international characters in PDF data.
+
+2015-03-15  Martin Møller <mmo@pwc.dk>
+	* Login page now operational. Limiting of old reports working.
+	* Full session support, including logout should now be in place.
+
+2015-03-19  Martin Møller <mmo@pwc.dk> - Update to v0.8
+	* Fixed some bugs in various files that made the Company text
+	unreadable.
+	* Fixed margins so text and graphs will stay withing bounds.
+	* Adjusted placement of $company_logo a bit to stay within red box.
+	* Changed color of text for $company_logo to white in stead of red
+	like the box already is. You can adjust this in pdf.functions.php.
+	* Reimplemented international characters via iconv in the explode call
+	of ezText in class.ezpdf.php.
+	* Made the login form an option in config.inc.php. $user_login=1 will
+	prompt for login. $user_login=0 will use the supplied $z_user and
+	$z_pass directly.
+	* Changed placement of logo, as it seems to be placed outside the
+	page. Adjust to your liking in createpdf.php, search for $pdf_logo.
+
+2015-03-24  Martin Møller <mmo@pwc.dk> - Update to v0.9
+	* Changed fonts to be slightly smaller, fitting better on the page.
+	* Fixed my selector names to not conflict with already used variables.
+	* ^-> $graphs has been renamed $GraphsOn, and $triggers to $TriggersOn
+	* More frequent debug output updates
+	* $version variable introduced in config.inc.php
+	
+2015-04-08  Martin Møller <mmo@pwc.dk>
+	* Added ability to show select items status in report, including debug
+	* Added option to generate report on localhost without requiring login
+	* Various small bugfixes to support the above
+	* >> Adjust $items in config.inc.php to your liking <<
+
+2016-10-03 Martin Møller <mmo@pwc.dk> - Update to v0.9.3
+	* Trend data (average) implemented, but somewhat in beta.
+	* Slight optimizations to the report layout.
+	* Tested on Zabbix 3.0. Trends will of course not work on earlier
+	versions.
+
+2016-10-05 Martin Møller <mmo@pwc.dk> - Update to v0.9.4
+	* Rudimentary graph selection via config.inc.php implemented. A more
+	userfacing solution is still a bit in the future. 
+
+2016-10-07 Martin Møller <mmo@pwc.dk> - Update to v0.9.5
+	* More humanized names for certain values - expanding $1 via key_
+	* Make entries with macros in the title more readable by removing
+	these in our text-output.
+
+2018-03-12 Martin Møller <mmo@pwc.dk> - Update to v0.9.6
+	* Adapted __logout function to work with Zabbix 3.4 - hopefully
+	previous versions still work. Old syntax is commented in __logout
+	function in inc/ZabbixAPI.class.php
+
+2018-03-12 Martin Møller <mmo@pwc.dk>
+	* Double linebreak after each data-section for better legibility
+	* Fixed issue with graphs not following the scheduled time if custom
+
+2018-09-13 Martin Møller <mmo@pwc.dk>
+	* Modified Chooser and CreatePDF to support subgroups, replacing /
+	with --
+	* Added support for overriding the preselected graphs with your own
+	statement at report generation time. No full list of graphs to check
+	or uncheck as of yet, but this should work for most people.
+
+2018-09-17 Martin Møller <mmo@pwc.dk> - Update to v1.0.0
+	* Implemented the possibility of including simple graphs of numeric
+	items without having to make a dedicated graph for it.
+	* Allowed override of the things you want included like $mygraphs
+	* Show version number at login and chooser screens
+
+PLANNED:
+	* HTML data for triggers/acknowledgements with fuller details. Right
+	now only the subject is shown in the PDF (or the message in the case
+	of acknowledgements). The reports would tend to get pretty big if the
+	full body of the event is included. I plan to make the events
+	collapsible, mostly like the 'show old reports' functionality from
+	Ronny.
+	* The option to selectively choose what graphs, items and triggers are
+	included in the report. This would probably have to be done by
+	redirecting to a new page that fetches all object ids and their names
+	and then checkboxes for each, resulting in perhaps three arrays that
+	will be used in the graphing/reporting process. (Semi-done, see
+	2018-09-13)
