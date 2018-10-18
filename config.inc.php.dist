@@ -4,7 +4,7 @@ $user_login=1; // If $user_login is 0, use credentials below and don't prompt fo
 //$user_login=0; // If $user_login is 0, use credentials below and don't prompt for login.
 $allow_localhost=1; // If a request is made from 127.0.0.1, use credentials below in createpdf.php
 
-$version	= '1.0.0';
+$version	= '1.0.1';
 
 // What items would you like to see in the report? Things that do not match are excluded automatically.
 $items = array('system information'=>'string','uptime'=>'seconds', 'boot time'=>'datetime', 'total memory'=>'number', 'available memory'=>'number', 'Free disk space'=>'number', 'Free swap space in %'=>'number', 'version of zabbix_agent'=>'string', 'services'=>'string', 'update'=>'number','certificate'=>'string','advanced ntp'=>'string','Interface speed'=>'bits','Operational status'=>'updown','Alias of interface'=>'string');
