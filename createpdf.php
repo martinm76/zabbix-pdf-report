@@ -77,6 +77,7 @@ if (isset($_GET['ReportRange'])) {
 		elseif($timeperiod == 'PrevMonth')	{ $timeperiod = '2678400';  }
 		elseif($timeperiod == 'Year')		{ $timeperiod = '31536000'; }
 		$starttime = time() - $timeperiod;
+		$stime      = date('YmdHis',$starttime);
 		$endtime   = time();
 	}
 	elseif ($_GET['ReportRange'] == "custom") {

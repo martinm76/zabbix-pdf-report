@@ -104,11 +104,16 @@
 	statement at report generation time. No full list of graphs to check
 	or uncheck as of yet, but this should work for most people.
 
-2018-09-17 Martin Møller <mmo@pwc.dk> - Update to v1.0.0
+2018-10-17 Martin Møller <mmo@pwc.dk> - Update to v1.0.0
 	* Implemented the possibility of including simple graphs of numeric
 	items without having to make a dedicated graph for it.
 	* Allowed override of the things you want included like $mygraphs
 	* Show version number at login and chooser screens
+
+2018-10-18 Martin Møller <mmo@pwc.dk> - Update to v1.0.1
+	* Defined $stime for predefined periods as well, just in case. At
+	least it makes it easier in DEBUG to see then the period starts.
+
 
 PLANNED:
 	* HTML data for triggers/acknowledgements with fuller details. Right
