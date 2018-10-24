@@ -47,7 +47,11 @@ function company_logo(&$pdf,$x,$y,$height,$wl=0,$wr=0){
   global $company_name;
   $pdf->saveState();
   $h=100;
-  $factor = $height/$h;
+  $scaler=strlen($company_name)/10; 
+  if ( $scaler < 1 ) {
+    $scaler = 1;
+  }
+  $factor = $height/($h*$scaler);
   $pdf->selectFont('./fonts/Helvetica-Bold.afm');
   $text = $company_name;
   $ts=100*$factor;

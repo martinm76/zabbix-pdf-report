@@ -1,5 +1,23 @@
 <?php
 // FUNCTIONS
+
+function fromto($stime,$period) {
+  global $debug;
+  // Convert $stime to ISO date for Zabbix 4.0+
+  // Sample $stime : 20181019212650
+  $from = date("Y-m-d+H:i:s", strtotime($stime));
+  $start = strtotime($stime);
+  $add = "+$period seconds";
+  $end = strtotime($add,$start);
+  $to   = date("Y-m-d+H:i:s", $end);
+/*
+  if ( $debug ) {
+    echo "<br>From set to: $from, Add set to: $add, Start: $start, End: $end, To set to: $to<br/>";
+  }
+*/
+  return array('from' => $from, 'to' => $to);
+}
+
 function tempdir($dir=false,$prefix='zabbix_report_') {
 	$tempfile=tempnam($dir,$prefix);
 	if (file_exists($tempfile)) { unlink($tempfile); }
@@ -72,9 +90,10 @@ function GetGraphImageById ($graphs, $stime, $period = 3600, $width, $height, $f
 	$output=curl_exec($ch);
 	// get graph
 	// TODO: foreach ($graphs as $graphid) { $filename....
+        $graphtime=fromto($stime,$period);
 		$graphid = $graphs;
 		//$image_file = $z_tmpimg_path ."/".$trimmed_hostname ."_" .$graphid .".png";
-		curl_setopt($ch, CURLOPT_URL, $z_url_graph ."?graphid=" .$graphid ."&width=" .$width ."&height=" .$height ."&period=" .$period ."&stime=" .$stime ."&isNow=0");
+		curl_setopt($ch, CURLOPT_URL, $z_url_graph ."?graphid=" . $graphid ."&profileIdx=web.graphs.filter&width=" . $width . "&height=" . $height ."&period=" . $period ."&stime=" .$stime . "&from=" . $graphtime['from'] . "&to=" . $graphtime['to'] . "&isNow=0");
 		$output = curl_exec($ch);
 		curl_close($ch);
 		// delete cookie
@@ -104,9 +123,10 @@ function GetItemImageById ($graphs, $stime, $period = 3600, $width, $height, $fi
 	$output=curl_exec($ch);
 	// get graph
 	// TODO: foreach ($graphs as $graphid) { $filename....
+        $graphtime=fromto($stime,$period);
 		$graphid = $graphs;
 		//$image_file = $z_tmpimg_path ."/".$trimmed_hostname ."_" .$graphid .".png";
-		curl_setopt($ch, CURLOPT_URL, $z_item_graph ."?itemids[$graphid]=" .$graphid ."&width=" .$width ."&height=" .$height ."&period=" .$period ."&stime=" .$stime ."&isNow=0");
+		curl_setopt($ch, CURLOPT_URL, $z_item_graph ."?itemids[$graphid]=" .$graphid ."&profileIdx=web.graphs.filter&width=" .$width ."&height=" .$height ."&period=" .$period ."&stime=" .$stime . "&from=" . $graphtime['from'] . "&to=" . $graphtime['to'] . "&isNow=0");
 		$output = curl_exec($ch);
 		curl_close($ch);
 		// delete cookie
@@ -190,7 +210,6 @@ function CreatePDF($hostarray) {
 			$stringData="#C\n"; // Use CODE font
 			fwrite($fh, $stringData);
 			foreach($items as $item=>$type) {
-				#$sys = ZabbixAPI::fetch_array('item','get',array('output'=>array('itemid','name','key_','description','lastclock','lastvalue'), 'hostids'=>$hostid, 'search'=>array('key_'=>"uptime"), 'sortfield'=>'name'));
 				$sys = ZabbixAPI::fetch_array('item','get',array('output'=>array('itemid','name','key_','description','lastclock','lastvalue','units'), 'hostids'=>$hostid, 'search'=>array('name'=>"$item"), 'sortfield'=>'name'));
 				$sys = maSort($sys,'key_');
 				if (!empty($sys[0])) {
@@ -218,13 +237,13 @@ function CreatePDF($hostarray) {
 							case 'seconds': $value=secondsToTime($value); break;
 							case 'ms': $value = round($value*1000,2) . " ms"; $tval = round($tval*1000,2) . " ms"; break;
 							case 'number': $value = round($value,2) . " " . $unit ; break;
-							case 'datetime': $value = date("Y-m-d H:m:s", $value); break;
+							case 'datetime': $value = date("Y-m-d H:i:s", $value); break;
 							case 'updown': $value = updown($value); break;
 							case 'percent': $value = percent(round($value,2)); break;
 						}
 						$name = cleanup_name($name,$key);
                                                 if ($showdates) {
-                                                        $dateval=date("Y-m-d H:m:s",$tstamp) . " - ";
+                                                        $dateval=date("Y-m-d H:i:s",$tstamp) . " - ";
                                                 } else {
                                                         $dateval="";
                                                 }
@@ -352,7 +371,8 @@ function CreatePDF($hostarray) {
 		}
 	// MMO: Back to before
 		if ( $GraphsOn == "yes" ) {
-			if ( $TriggersOn == "yes" ) {
+			$count = 0;
+			if ( $TriggersOn == "yes"  or  $ItemsOn == "yes"  or $TrendsOn == "yes" ) {
 				fwrite($fh,"#NP\n");
 			}
 
@@ -387,15 +407,21 @@ function CreatePDF($hostarray) {
 					$stringData = "[" .$image_file ."]\n";
 					fwrite($fh, $stringData);
 					GetGraphImageById($graphid,$stime,$timeperiod,'750','150',$image_file);
+					$count+=1;
 		/*			fclose($fh); */
 				} else {
 					if (($debug) and ($mygraphs!="")) { echo "$graphname (id:$graphid) did not match the expression - skipping it.<BR/>\n"; }
+				}
+				if ( $count == 3 ) {
+					fwrite($fh, "#NP\n");
+					$count = 0;
 				}
 				if ($debug) { flush(); ob_flush(); flush(); }
 			}
 			fwrite($fh, "#NP\n");
 		}
 		if ( $ItemGraphsOn == "yes" ) {
+			$count = 0;
 /*			if ( $TriggersOn == "yes" ) {
 				fwrite($fh,"#NP\n");
 			} */
@@ -435,6 +461,10 @@ function CreatePDF($hostarray) {
 		/*			fclose($fh); */
 				} else {
 					if (($debug) and ($myitemgraphs!="")) { echo "$graphname (id:$graphid) did not match the expression - skipping it.<BR/>\n"; }
+				}
+				if ( $count == 3 ) {
+					fwrite($fh, "#NP\n");
+					$count = 0;
 				}
 				if ($debug) { flush(); ob_flush(); flush(); }
 			}

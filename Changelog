@@ -114,6 +114,15 @@
 	* Defined $stime for predefined periods as well, just in case. At
 	least it makes it easier in DEBUG to see then the period starts.
 
+2018-10-20 Martin Møller <mmo@pwc.dk> - Update to v1.1.0
+	* Fixed issue with graphs not displaying the correct time interval in Zabbix 4.x, unless you happened to have chosen last hour. Should still work with older versions. 
+	* Fixed the first bug (the issue above) : https://github.com/martinm76/zabbix-pdf-report/issues/1 (inc/createpdf.functions.php)
+
+2018-10-21 Martin Møller <mmo@pwc.dk> - Update to v1.1.1
+	* Implemented basic scaler for Company Name on the front page. May not always work well, but should be better than what went before. (inc/pdf.functions.php)
+	* Hopefully fixed the annoying issue of some titles for graphs being on the previous page by limiting number of graphs per page to 3. (inc/createpdf.functions.php)
+	* Fixed a couple of date calls using 'm' for minutes in stead of 'i'
+	* Tried to optimize page layout with both single host and hostgroup.
 
 PLANNED:
 	* HTML data for triggers/acknowledgements with fuller details. Right
