@@ -124,7 +124,16 @@
 	* Fixed a couple of date calls using 'm' for minutes in stead of 'i'
 	* Tried to optimize page layout with both single host and hostgroup.
 
+2018-10-24 Martin Møller <mmo@pwc.dk> 
+	* Updated all Javascript files and some CSS files to newest versions
+
+2018-10-30 Martin Møller <mmo@pwc.dk> 
+	* Adjusted various parameters regarding layout of the report and other
+	minor tweaks.
+
 PLANNED:
+	* Look into excluding headlines for empty sections (requires rewriting
+	some parts of the generator code).
 	* HTML data for triggers/acknowledgements with fuller details. Right
 	now only the subject is shown in the PDF (or the message in the case
 	of acknowledgements). The reports would tend to get pretty big if the

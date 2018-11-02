@@ -234,6 +234,7 @@ function CreatePDF($hostarray) {
 						$tstamp=$val['lastclock'];
 						$id=$val['itemid'];
 						switch ($type) {
+							case 'bytes': $value=formatBytes($value); $type='string'; break;
 							case 'seconds': $value=secondsToTime($value); break;
 							case 'ms': $value = round($value*1000,2) . " ms"; $tval = round($tval*1000,2) . " ms"; break;
 							case 'number': $value = round($value,2) . " " . $unit ; break;
@@ -418,7 +419,11 @@ function CreatePDF($hostarray) {
 				}
 				if ($debug) { flush(); ob_flush(); flush(); }
 			}
-			fwrite($fh, "#NP\n");
+			if (strpos($stringData,'1<') === 0 ) { 
+				fwrite($fh, "No matching graphs found. Maybe tune the setting?\n"); 
+			} else {
+				fwrite($fh, "#NP\n");
+			}
 		}
 		if ( $ItemGraphsOn == "yes" ) {
 			$count = 0;
@@ -467,9 +472,16 @@ function CreatePDF($hostarray) {
 					$count = 0;
 				}
 				if ($debug) { flush(); ob_flush(); flush(); }
+			} 
+			if (strpos($stringData,'1<') === 0 ) { 
+				fwrite($fh, "No items found to graph. Maybe tune the setting?\n"); 
+			} else {
+				fwrite($fh, "#NP\n");
 			}
-			fwrite($fh, "#NP\n");
 		}
+	if (strpos($stringData,'1<') === 0 ) { 
+		fwrite($fh, "#NP\n");
+	}
 	fclose($fh);
 	}
 }

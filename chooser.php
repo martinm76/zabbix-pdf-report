@@ -50,13 +50,13 @@ header( 'Content-type: text/html; charset=utf-8' );
 	<link rel="stylesheet" type="text/css" href="css/zabbix.default.css" />
 	<link rel="stylesheet" type="text/css" href="css/zabbix.color.css" />
 	<link rel="stylesheet" type="text/css" href="css/zabbix.report.css" />
-	<link rel="stylesheet" type="text/css" href="css/jquery.datetimepicker.css"/ >
-	<link rel="stylesheet" type="text/css" href="css/tablesorter.css"/ >
+	<link rel="stylesheet" type="text/css" href="css/jquery.datetimepicker.min.css"/ >
+	<link rel="stylesheet" type="text/css" href="css/jquery.tablesorter.pager.min.css"/ >
 	<link rel="stylesheet" type="text/css" href="css/select2.css"/ >
-	<script type="text/javascript" src="js/jquery-2.2.0.min.js"></script>
-	<script type="text/javascript" src="js/jquery.datetimepicker.js"></script>
+	<script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="js/jquery.datetimepicker.min.js"></script>
 	<script type="text/javascript" src="js/jquery.validate.min.js"></script>
-	<script type="text/javascript" src="js/jquery.tablesorter.min.js"></script> 
+	<script type="text/javascript" src="js/jquery.tablesorter.combined.min.js"></script> 
 	<script type="text/javascript" src="js/select2.min.js"></script> 
 	<script>
 		$(function(){

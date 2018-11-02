@@ -7,7 +7,7 @@ $allow_localhost=1; // If a request is made from 127.0.0.1, use credentials belo
 $version	= '1.1.1';
 
 // What items would you like to see in the report? Things that do not match are excluded automatically.
-$items = array('system information'=>'string','uptime'=>'seconds', 'boot time'=>'datetime', 'total memory'=>'number', 'available memory'=>'number', 'Free disk space'=>'number', 'Free swap space in %'=>'number', 'version of zabbix_agent'=>'string', 'services'=>'string', 'update'=>'number','certificate'=>'string','advanced ntp'=>'string','Interface speed'=>'bits','Operational status'=>'updown','Alias of interface'=>'string');
+$items = array('system information'=>'string','uptime'=>'seconds', 'boot time'=>'datetime', 'total memory'=>'bytes', 'available memory'=>'bytes', 'Free disk space'=>'number', 'Free swap space in %'=>'number', 'version of zabbix_agent'=>'string', 'services'=>'string', 'update'=>'number','certificate'=>'string','advanced ntp'=>'string','Interface speed'=>'bits','Operational status'=>'updown','Alias of interface'=>'string','certificate'=>'string');
 
 // Which items would you like to see overall statistics for over the selected period? Presently only avg is shown, but min and max could easily be added.
 $trends = array('ICMP ping'=>'updown','ICMP loss'=>'number', 'ICMP response'=>'ms', 'BatteryCharge'=>'number', 'Battery capacity'=>'number', 'voltage'=>'number', 'output power'=>'number', 'CPU Idle Time'=>'number', '15 min average'=>'number', 'Temp'=>'number', 'Watt'=>'number', 'uptime'=>'seconds','transactions per second'=>'number');
@@ -21,6 +21,7 @@ $mygraphs = '#(Ping|CPU load|CPU usage|CPU util|processor|Disk space|Swap|Ethern
 $myitemgraphs = '#(Utilization of|farm connection|Average Latency|Number of processes|Cache % Hit)#';
 
 # zabbix server info(user must have API access)
+// $z_server 	= 'http://localhost/zabbix/';
 $z_server 	= 'https://YourServerHere/zabbix/'; // Replace YourServerHere with either en IP or an FDQN (e.g. zabbix.company.com). Remove the s in https if for some reason you don't use https yet. Or better yet, get Let's Encrypt installed and use https!
 $z_user		= 'Admin';
 $z_pass		= 'YourPasswordHere';
