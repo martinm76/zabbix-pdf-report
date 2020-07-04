@@ -5,6 +5,13 @@ They also need to be writable by the webserver. At present they are writable by 
 
 If in doubt: mkdir tmp reports; chmod 777 tmp reports
 
+I have tried to prepare fixrights.sh for SELinux being active on the system. It may or may not be enough to allow report generation.
+If you fail to get the PDF's generated, try disabling SELinux for a while:
+
+```
+setenforce 0
+```
+
 New User
 ========
 Copy config.inc.php.dist to config.inc.php and edit it to fit your environment. It should be fairly well documented internally.

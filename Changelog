@@ -131,6 +131,23 @@
 	* Adjusted various parameters regarding layout of the report and other
 	minor tweaks.
 
+2020-07-05 Martin Møller <martin.moller@pwc.com> - Update to v1.2.0
+	* Fixed issue in index.php with = in stead of == if user login is
+	disabled
+	* Updated jQuery to 3.5.1
+	* Fixed references to previously removed 3.3.1 version in chooser.php
+	* Updated datetimepicker to latest available
+	  - It seems there is incompatibility with current jQuery though
+	  - There is a date/time picker, but very generic
+	* Adjusted scaler formula for company name in PDF
+	  - Should stay within page size in most cases now
+	* Disabled curl debugging, which apparently was enabled before.
+	* Added rudimentary attempts at fixing possible SELinux issues
+	  - For this to work, the report must be placed in the normal www 
+	    directory (usually /var/www/html or /srv/www/html)
+	* Fixed 'Show old reports' not necessarily showing all it should.
+	* Tested with Zabbix 5.0 and PHP 7.2
+
 PLANNED:
 	* Look into excluding headlines for empty sections (requires rewriting
 	some parts of the generator code).

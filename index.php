@@ -8,7 +8,7 @@ include("inc/index.functions.php");
 include("config.php");
 */
 
-if ( $user_login = 0 ) {
+if ( $user_login == 0 ) {
   header("Location: chooser.php");
   exit(0);
 }
@@ -41,7 +41,7 @@ header("location: chooser.php");
 	<meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
 	<title>Zabbix Dynamic PDF Report</title>
 	<meta charset="utf-8" />
-	<link rel="shortcut icon" href="/zabbix/images/general/zabbix.ico" />
+	<link rel="shortcut icon" href="/zabbix/favicon.ico" />
 	<link rel="stylesheet" type="text/css" href="css/zabbix.default.css" />
 	<link rel="stylesheet" type="text/css" href="css/zabbix.color.css" />
 	<link rel="stylesheet" type="text/css" href="css/zabbix.report.css" />

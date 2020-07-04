@@ -46,17 +46,17 @@ header( 'Content-type: text/html; charset=utf-8' );
 	<meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
 	<title>Zabbix Dynamic PDF Report</title>
 	<meta charset="utf-8" />
-	<link rel="shortcut icon" href="/zabbix/images/general/zabbix.ico" />
+	<link rel="shortcut icon" href="/zabbix/favicon.ico" />
 	<link rel="stylesheet" type="text/css" href="css/zabbix.default.css" />
 	<link rel="stylesheet" type="text/css" href="css/zabbix.color.css" />
 	<link rel="stylesheet" type="text/css" href="css/zabbix.report.css" />
-	<link rel="stylesheet" type="text/css" href="css/jquery.datetimepicker.min.css"/ >
-	<link rel="stylesheet" type="text/css" href="css/jquery.tablesorter.pager.min.css"/ >
+	<link rel="stylesheet" type="text/css" href="js/jquery.datetimepicker.css"/ >
+	<link rel="stylesheet" type="text/css" href="css/tablesorter.css"/ >
 	<link rel="stylesheet" type="text/css" href="css/select2.css"/ >
-	<script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
-	<script type="text/javascript" src="js/jquery.datetimepicker.min.js"></script>
+	<script type="text/javascript" src="js/jquery.js"></script>
+        <script type="text/javascript" src="js/jquery.datetimepicker.js"></script>
 	<script type="text/javascript" src="js/jquery.validate.min.js"></script>
-	<script type="text/javascript" src="js/jquery.tablesorter.combined.min.js"></script> 
+	<script type="text/javascript" src="js/jquery.tablesorter.min.js"></script> 
 	<script type="text/javascript" src="js/select2.min.js"></script> 
 	<script>
 		$(function(){
@@ -237,7 +237,7 @@ ReadArray($host_groups);
 </table>
 </div>
 
-</html></body>
+
 <script>
 jQuery(function(){
  jQuery('#datepicker_start').datetimepicker({
@@ -271,3 +271,5 @@ jQuery(function(){
 jQuery('#timepicker_start').datetimepicker({ datepicker:false, format:'H:i' });
 jQuery('#timepicker_end').datetimepicker({ datepicker:false, format:'H:i' });
 </script>
+</body>
+</html>
