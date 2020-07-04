@@ -330,6 +330,7 @@ class ZabbixAPI {
         $opts = array(
                 CURLOPT_RETURNTRANSFER => true,     // Allows for the return of a curl handle
                 //CURLOPT_VERBOSE => true,          // outputs verbose curl information (like --verbose with curl on the cli)
+                CURLOPT_VERBOSE => false,          // outputs verbose curl information (like --verbose with curl on the cli)
                 //CURLOPT_HEADER => true,           // In a verbose output, outputs headers
                 CURLOPT_TIMEOUT => 30,              // Maximum number of seconds to allow curl to process the entire request
                 CURLOPT_CONNECTTIMEOUT => 5,        // Maximm number of seconds to establish a connection, shouldn't take 5 seconds

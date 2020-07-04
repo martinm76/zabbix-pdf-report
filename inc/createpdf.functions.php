@@ -79,6 +79,7 @@ function GetGraphImageById ($graphs, $stime, $period = 3600, $width, $height, $f
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_URL, $z_url_index);
 	curl_setopt($ch, CURLOPT_HEADER, false);
+	curl_setopt($ch, CURLOPT_VERBOSE, false);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch, CURLOPT_BINARYTRANSFER, true);
 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
