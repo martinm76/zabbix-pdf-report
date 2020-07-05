@@ -1,5 +1,14 @@
 #!/bin/sh
 
+wwwproc=$(netstat -tpln | grep -e :80 -e :443 | grep / | tail -1 | cut -c80- | cut -d"/" -f1) # PID of process running the webserver
+wwwsubproc=$(pstree -p $wwwproc | tail -1 | cut -d"(" -f2 | cut -d")" -f1) # Find a child process, if possible
+wwwuser=$(ps u $wwwsubproc | tail -1 | cut -d" " -f1) # Hopefully the user running apache
+
+
+if [ "$wwwproc" != "root" ] ; then
+  wwwuser="apache" # Educated guess
+fi
+
 if [ ! -e tmp ] ; then 
   mkdir tmp
 fi
@@ -9,6 +18,8 @@ if [ ! -e reports ] ; then
 fi
 
 chmod 777 tmp reports
+
+chown -R $wwwuser * 
 
 ls -ld tmp reports
 
