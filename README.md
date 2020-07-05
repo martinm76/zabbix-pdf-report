@@ -13,7 +13,8 @@ setenforce 0
 ```
 
 You need various PHP modules installed for this to work. You may often have to install these yourself:
-php-curl
+
+php-curl 
 php-json
 
 (package name may vary and in some cases include a PHP version)
