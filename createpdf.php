@@ -143,7 +143,10 @@ if ($debug) {
 }
 // get graphids
 // Login to Zabbix API using ZabbixAPI.class.php
-//ZabbixAPI::debugEnabled(TRUE);
+if ( $zabbix_version < 5.0 ) {
+  ZabbixAPI::debugEnabled(TRUE);
+}
+
 ZabbixAPI::login($z_server,$z_user,$z_pass)
 	or die('Unable to login: '.print_r(ZabbixAPI::getLastError(),true));
 

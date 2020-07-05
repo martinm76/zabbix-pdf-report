@@ -25,8 +25,11 @@ $_SESSION['login_user']=$myusername;
 $_SESSION['username']=$myusername;
 $_SESSION['password']=$mypassword;
 //print_r($_SESSION); 
- 
-//ZabbixAPI::debugEnabled(TRUE);
+
+if ( $zabbix_version < 5.0 ) { 
+  ZabbixAPI::debugEnabled(TRUE);
+}
+
 ZabbixAPI::login($z_server,$myusername,$mypassword)
 	or die('Unable to login: '.print_r(ZabbixAPI::getLastError(),true));
 

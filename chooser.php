@@ -129,7 +129,10 @@ error_reporting(E_ALL);
 set_time_limit(60);
 
 // ZabbixAPI Connection
-// ZabbixAPI::debugEnabled(TRUE);
+if ($zabbix_version < 5.0 ) {
+  ZabbixAPI::debugEnabled(TRUE);
+}
+
 ZabbixAPI::login($z_server,$z_user,$z_pass)
 	or die('Unable to login: '.print_r(ZabbixAPI::getLastError(),true));
 //fetch graph data host
