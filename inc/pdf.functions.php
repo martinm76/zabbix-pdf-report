@@ -44,28 +44,30 @@ class Creport extends Cezpdf {
 }
 
 function company_logo(&$pdf,$x,$y,$height,$wl=0,$wr=0){
-  global $company_name;
+  global $company_name, $hide_company_name;
   $pdf->saveState();
-  $h=100;
-  $scaler=strlen($company_name)/10; 
-  if ( $scaler < 1 ) {
-    $scaler = 1;
+  if ( ! $hide_company_name ) {
+    $h=100;
+    $scaler=strlen($company_name)/6; 
+    if ( $scaler < 1 ) {
+      $scaler = 1;
+    }
+    $factor = $height/($h*$scaler);
+    $pdf->selectFont('./fonts/Helvetica-Bold.afm');
+    $text = $company_name;
+    $ts=100*$factor;
+    $th = $pdf->getFontHeight($ts);
+    $td = $pdf->getFontDecender($ts);
+    $tw = $pdf->getTextWidth($ts,$text);
+    $pdf->setColor(212/255,0/255,0/255);
+    $z = 0.86;
+    $pdf->filledRectangle($x-$wl,$y-$z*$h*$factor,$tw*1.2+$wr+$wl,$h*$factor*$z);
+    $pdf->setColor(255/255,255/255,255/255);
+    $pdf->addText($x,$y-$th*0.85-$td,$ts,$text);
+    $pdf->setColor(212/255,0/255,0/255);
+    $pdf->addText($x,$y-$th-$td,$ts*0.1,'');
+    $pdf->restoreState();
   }
-  $factor = $height/($h*$scaler);
-  $pdf->selectFont('./fonts/Helvetica-Bold.afm');
-  $text = $company_name;
-  $ts=100*$factor;
-  $th = $pdf->getFontHeight($ts);
-  $td = $pdf->getFontDecender($ts);
-  $tw = $pdf->getTextWidth($ts,$text);
-  $pdf->setColor(212/255,0/255,0/255);
-  $z = 0.86;
-  $pdf->filledRectangle($x-$wl,$y-$z*$h*$factor,$tw*1.2+$wr+$wl,$h*$factor*$z);
-  $pdf->setColor(255/255,255/255,255/255);
-  $pdf->addText($x,$y-$th*0.85-$td,$ts,$text);
-  $pdf->setColor(212/255,0/255,0/255);
-  $pdf->addText($x,$y-$th-$td,$ts*0.1,'');
-  $pdf->restoreState();
   return $height;
 }
 ?>
