@@ -12,6 +12,12 @@ If you fail to get the PDF's generated, try disabling SELinux for a while:
 setenforce 0
 ```
 
+You need various PHP modules installed for this to work. You may often have to install these yourself:
+php-curl
+php-json
+
+(package name may vary and in some cases include a PHP version)
+
 New User
 ========
 Copy config.inc.php.dist to config.inc.php and edit it to fit your environment. It should be fairly well documented internally.
