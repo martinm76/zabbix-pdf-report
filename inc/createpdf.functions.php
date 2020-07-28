@@ -35,6 +35,11 @@ function cleanup_name($name,$key="") {
 		$name = preg_replace('#\$1#',$opval,$name); 
 		if ($debug) { echo "Opval: $opval - New name: $name\n<p>"; }
 	}
+	if (( strpos($name, '$2') > 0 ) and (strlen($key)>0)) { 
+		$opval=preg_replace("#.*\[#","",$key); $opval=preg_replace("#^.*,#","",$opval); $opval=preg_replace("#\]$#","",$opval);
+		$name = preg_replace('#\$2#',$opval,$name); 
+		if ($debug) { echo "Opval2: $opval - New name: $name\n<p>"; }
+	}
 	if ( strpos($name, "{") > 0 ) {
 		$name=preg_replace("#{.*$#","",$name);
 		if ($debug) { echo "Modified name: $name<BR/>\n"; }

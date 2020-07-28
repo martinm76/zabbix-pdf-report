@@ -131,7 +131,7 @@
 	* Adjusted various parameters regarding layout of the report and other
 	minor tweaks.
 
-2020-07-05 Martin Møller <martin.moller@pwc.com> - Update to v1.2.0
+2020-07-05 Martin Møller <martin.moller@pwc.com> - Update to v1.2.x
 	* Fixed issue in index.php with = in stead of == if user login is
 	disabled
 	* Updated jQuery to 3.5.1
@@ -147,6 +147,9 @@
 	    directory (usually /var/www/html or /srv/www/html)
 	* Fixed 'Show old reports' not necessarily showing all it should.
 	* Tested with Zabbix 5.0 and PHP 7.2
+
+2020-07-28 Martin Møller <martin.moller@pwc.com> - Update to v1.2.3
+	* Fixed it so that $2 in item graphs gets resolved.
 
 PLANNED:
 	* Look into excluding headlines for empty sections (requires rewriting
