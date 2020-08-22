@@ -52,10 +52,13 @@ function ListOldReports($dir) {
 	foreach ($dir_files as $fdate => $fname) {
 		$fdate = explode(",",$fdate);
 		$fdate = date("Y.m.d H:i:s", $fdate[0]);
-		$name=substr(str_replace("_"," ",$fname), 0, -4);
-		$name=substr(str_replace("--","/",$name), 0, 99);
+		$name=substr(rawurldecode($fname),0,-4);
+		$url=rawurlencode($fname);
 		if ((in_array($name, array_flatten($hosts)) or (in_array($name, array_flatten($host_groups))))) {
-			echo "<tr><td>$fdate</td><td align=\"left\"><a href=\"reports/$fname\">$name</a></td></tr>\n";
+			echo "<tr><td>$fdate</td><td align=\"left\"><a href=\"reports/$url\">$name</a></td></tr>\n";
+		} else {
+			echo "<tr><td>$fdate</td><td align=\"left\"><a href=\"reports/$url\">NOT FOUND: $name</a></td></tr>\n";
+			echo $hosts;
 		}
 	}
 	echo "</tbody>";

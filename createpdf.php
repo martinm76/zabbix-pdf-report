@@ -1,6 +1,6 @@
 <?php
 //////////
-// 
+//
 // (c) Travis Mathis - travisdmathis@gmail.com
 // Zabbix Report Generator v0.9
 //
@@ -59,7 +59,7 @@ if (isset($_GET['TriggersOn'])) { $TriggersOn="yes"; }
 if (isset($_GET['ItemsOn'])) { $ItemsOn="yes"; }
 if (isset($_GET['TrendsOn'])) { $TrendsOn="yes"; }
 
-if (isset($_GET['debug']))	 { $debug	= true; } 
+if (isset($_GET['debug']))	 { $debug	= true; }
 else				 { $debug	= false; }
 if (isset($_GET['HostID']))	 { $hostid	= filter_input(INPUT_GET,'HostID', FILTER_SANITIZE_STRING); }
 if (isset($_GET['GroupID']))	 { $groupid	= filter_input(INPUT_GET,'GroupID', FILTER_SANITIZE_STRING); }
@@ -67,7 +67,7 @@ if (isset($_GET['ReportType']))  { $reporttype	= filter_input(INPUT_GET,'ReportT
 if (isset($_GET['ReportRange'])) {
 	if ($_GET['ReportRange'] == "last") {
 		$timeperiod		= filter_input(INPUT_GET,'timePeriod', FILTER_SANITIZE_STRING);
-		// Format $timeperiod into seconds 
+		// Format $timeperiod into seconds
 		if    ($timeperiod == 'Hour')		{ $timeperiod = '3600';     }
 		elseif($timeperiod == 'Day')		{ $timeperiod = '86400';    }
 		elseif($timeperiod == 'PrevDay')	{ $timeperiod = '86400';    }
@@ -84,7 +84,7 @@ if (isset($_GET['ReportRange'])) {
 		//var_dump($_GET);
 		// TODO: Check if start/end is empty
 		if (isset($_GET['startdate'])) {
-			if ($_GET['startdate'] == "") { 
+			if ($_GET['startdate'] == "") {
 				echo "<font color=\"red\"><h1>Startdate is missing!</h1></font></br>\n";
 				echo "When setting custom report period, startdate is required</br>\n";
 				exit;
@@ -94,11 +94,11 @@ if (isset($_GET['ReportRange'])) {
 		$stime      = date('YmdHis',$starttime);
 		$endtime    = strtotime($_GET['enddate'] . " " . $_GET['endtime']);
 		$timeperiod = $endtime - $starttime;
-		if ($starttime > $endtime) { 
-			echo "<font color=\"red\"><h1>Startdate need to be before tomorrow or end date!</h1></font></br>\n"; 
+		if ($starttime > $endtime) {
+			echo "<font color=\"red\"><h1>Startdate need to be before tomorrow or end date!</h1></font></br>\n";
 			exit;
 		} elseif ($endtime - $starttime < 3600) {
-			echo "<font color=\"red\"><h1>Time frame need to be minimum 1 hour!</h1></font></br>\n"; 
+			echo "<font color=\"red\"><h1>Time frame need to be minimum 1 hour!</h1></font></br>\n";
 			exit;
 		}
 	}
@@ -169,7 +169,7 @@ if ($reporttype == 'host') {
 	//var_dump($hosts);
 	// Get name to be used in PLACEHOLDER-part of filename
 	$name = $hosts[0]['name'];
-	$reportname=str_replace(" ", "_",$name);
+	$reportname=rawurlencode($name);
 	CreatePDF($hosts);
 }
 elseif ($reporttype == 'hostgroup') {
@@ -181,8 +181,7 @@ elseif ($reporttype == 'hostgroup') {
 		or die('Unable to get hostgroup: '.print_r(ZabbixAPI::getLastError(),true));
 	//var_dump($hostgroupname);
 	$name = $hostgroupname[0]['name'];
-	$reportname=str_replace(" ", "_",$name);
-	$reportname=str_replace("/", "--",$name);
+	$reportname=rawurlencode($name);
 	CreatePDF($hosts);
 }
 else {
@@ -253,7 +252,7 @@ $pdf->selectFont($mainFont);
 if (file_exists($pdf_logo)){
   //$pdf->addPngFromFile($pdf_logo,199,$pdf->y-375,200,0);
   $pdf->addPngFromFile($pdf_logo,50,$pdf->y,200,0);
-  if ($debug) { 
+  if ($debug) {
     echo "$pdf_logo written to PDF-file ...<br/>";
   }
 } else if ($debug) {
@@ -275,7 +274,7 @@ $collecting=0;
 $code='';
 
 foreach ($data as $key => $line){
-  // go through each line, showing it as required, if it is surrounded by '<>' then 
+  // go through each line, showing it as required, if it is surrounded by '<>' then
   // assume that it is a title
   $line=chop($line);
   if (strlen($line) && $line[0]=='#'){
@@ -350,7 +349,7 @@ foreach ($data as $key => $line){
     // the ezpdf function will take care of all of the wrapping etc.
     $pdf->ezText($line,$size,$textOptions);
   }
-  
+
 }
 
 $pdf->ezStopPageNumbers(1,1);
