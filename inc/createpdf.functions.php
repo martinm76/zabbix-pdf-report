@@ -30,14 +30,14 @@ function tempdir($dir=false,$prefix='zabbix_report_') {
 function cleanup_name($name,$key="") {
 	global $debug;
 
-	if (( strpos($name, '$1') > 0 ) and (strlen($key)>0)) { 
+	if (( strpos($name, '$1') > 0 ) and (strlen($key)>0)) {
 		$opval=preg_replace("#.*\[#","",$key); $opval=preg_replace("#,.*$#","",$opval); $opval=preg_replace("#\]$#","",$opval);
-		$name = preg_replace('#\$1#',$opval,$name); 
+		$name = preg_replace('#\$1#',$opval,$name);
 		if ($debug) { echo "Opval: $opval - New name: $name\n<p>"; }
 	}
-	if (( strpos($name, '$2') > 0 ) and (strlen($key)>0)) { 
+	if (( strpos($name, '$2') > 0 ) and (strlen($key)>0)) {
 		$opval=preg_replace("#.*\[#","",$key); $opval=preg_replace("#^.*,#","",$opval); $opval=preg_replace("#\]$#","",$opval);
-		$name = preg_replace('#\$2#',$opval,$name); 
+		$name = preg_replace('#\$2#',$opval,$name);
 		if ($debug) { echo "Opval2: $opval - New name: $name\n<p>"; }
 	}
 	if ( strpos($name, "{") > 0 ) {
@@ -92,7 +92,7 @@ function GetGraphImageById ($graphs, $stime, $period = 3600, $width, $height, $f
 	curl_setopt($ch, CURLOPT_POSTFIELDS, $z_login_data);
 	curl_setopt($ch, CURLOPT_COOKIEJAR, $filename_cookie);
 	curl_setopt($ch, CURLOPT_COOKIEFILE, $filename_cookie);
-	// login	
+	// login
 	$output=curl_exec($ch);
 	// get graph
 	// TODO: foreach ($graphs as $graphid) { $filename....
@@ -125,7 +125,7 @@ function GetItemImageById ($graphs, $stime, $period = 3600, $width, $height, $fi
 	curl_setopt($ch, CURLOPT_POSTFIELDS, $z_login_data);
 	curl_setopt($ch, CURLOPT_COOKIEJAR, $filename_cookie);
 	curl_setopt($ch, CURLOPT_COOKIEFILE, $filename_cookie);
-	// login	
+	// login
 	$output=curl_exec($ch);
 	// get graph
 	// TODO: foreach ($graphs as $graphid) { $filename....
@@ -153,33 +153,33 @@ function percent($value) {
   return floor($value*100) . " %";
 }
 
-function formatBytes($bytes, $precision = 2) { 
-    $units = array('B', 'KB', 'MB', 'GB', 'TB'); 
+function formatBytes($bytes, $precision = 2) {
+    $units = array('B', 'KB', 'MB', 'GB', 'TB');
 
-    $bytes = max($bytes, 0); 
-    $pow = floor(($bytes ? log($bytes) : 0) / log(1024)); 
-    $pow = min($pow, count($units) - 1); 
+    $bytes = max($bytes, 0);
+    $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
+    $pow = min($pow, count($units) - 1);
 
     // Uncomment one of the following alternatives
     // $bytes /= pow(1024, $pow);
-    $bytes /= (1 << (10 * $pow)); 
+    $bytes /= (1 << (10 * $pow));
 
-    return round($bytes, $precision) . ' ' . $units[$pow]; 
-} 
+    return round($bytes, $precision) . ' ' . $units[$pow];
+}
 
-function formatBits($bits, $precision = 2) { 
-    $units = array('bps', 'Kbps', 'Mbps', 'Gbps', 'Tbps'); 
+function formatBits($bits, $precision = 2) {
+    $units = array('bps', 'Kbps', 'Mbps', 'Gbps', 'Tbps');
 
-    $bits = max($bits, 0); 
-    $pow = floor(($bits ? log($bits) : 0) / log(1000)); 
-    $pow = min($pow, count($units) - 1); 
+    $bits = max($bits, 0);
+    $pow = floor(($bits ? log($bits) : 0) / log(1000));
+    $pow = min($pow, count($units) - 1);
 
     // Uncomment one of the following alternatives
     $bits /= pow(1000, $pow);
-    //$bits /= (1 << (10 * $pow)); 
+    //$bits /= (1 << (10 * $pow));
 
-    return round($bits, $precision) . ' ' . $units[$pow]; 
-} 
+    return round($bits, $precision) . ' ' . $units[$pow];
+}
 
 function updown($value) {
 	switch ($value) {
@@ -200,7 +200,7 @@ function CreatePDF($hostarray) {
 	foreach($hostarray as $key=>$host) {
 		$hostid   = $hostarray[$key]['hostid'];
 		$hostname = $hostarray[$key]['name'];
-		$trimmed_hostname = str_replace(" ", "_",$hostname);
+		$trimmed_hostname = rawurlencode($hostname);
 
 		if ($debug) { echo "<b>$hostname(id:$hostid)</b></br>\n"; }
 		$fh = fopen($tmp_pdf_data, 'a') or die("Can't open $tmp_pdf_data for writing!");
@@ -402,9 +402,9 @@ function CreatePDF($hostarray) {
 				$graphname = cleanup_name($graphname);
 
 				if (preg_match($mygraphs, $graphname)) {
-					if (($debug) and ($mygraphs!="")) { 
-						echo "<B>$graphname (id:$graphid) matched the expression - including it.</B><BR/>\n"; 
-						echo "<pre>" ; print_r($graphs); echo "</pre>\n"; 
+					if (($debug) and ($mygraphs!="")) {
+						echo "<B>$graphname (id:$graphid) matched the expression - including it.</B><BR/>\n";
+						echo "<pre>" ; print_r($graphs); echo "</pre>\n";
 					}
 					$image_file = $z_tmpimg_path ."/".$trimmed_hostname ."_" .$graphid .".png";
 //					if ($debug) { echo "$graphname(id:$graphid)</br>\n"; }
@@ -425,8 +425,8 @@ function CreatePDF($hostarray) {
 				}
 				if ($debug) { flush(); ob_flush(); flush(); }
 			}
-			if (strpos($stringData,'1<') === 0 ) { 
-				fwrite($fh, "No matching graphs found. Maybe tune the setting?\n"); 
+			if (strpos($stringData,'1<') === 0 ) {
+				fwrite($fh, "No matching graphs found. Maybe tune the setting?\n");
 			} else {
 				fwrite($fh, "#NP\n");
 			}
@@ -457,9 +457,9 @@ function CreatePDF($hostarray) {
 				$graphname = cleanup_name($graphname,$graphkey);
 
 				if (preg_match($myitemgraphs, $graphname)) {
-					if (($debug) and ($myitemgraphs!="")) { 
-						echo "<B>$graphname (id:$graphid) matched the expression - including it.</B><BR/>\n"; 
-						echo "<pre>" ; print_r($graphs); echo "</pre>\n"; 
+					if (($debug) and ($myitemgraphs!="")) {
+						echo "<B>$graphname (id:$graphid) matched the expression - including it.</B><BR/>\n";
+						echo "<pre>" ; print_r($graphs); echo "</pre>\n";
 					}
 					$image_file = $z_tmpimg_path ."/".$trimmed_hostname ."_" .$graphid .".png";
 //					if ($debug) { echo "$graphname(id:$graphid)</br>\n"; }
@@ -478,14 +478,14 @@ function CreatePDF($hostarray) {
 					$count = 0;
 				}
 				if ($debug) { flush(); ob_flush(); flush(); }
-			} 
-			if (strpos($stringData,'1<') === 0 ) { 
-				fwrite($fh, "No items found to graph. Maybe tune the setting?\n"); 
+			}
+			if (strpos($stringData,'1<') === 0 ) {
+				fwrite($fh, "No items found to graph. Maybe tune the setting?\n");
 			} else {
 				fwrite($fh, "#NP\n");
 			}
 		}
-	if (strpos($stringData,'1<') === 0 ) { 
+	if (strpos($stringData,'1<') === 0 ) {
 		fwrite($fh, "#NP\n");
 	}
 	fclose($fh);
