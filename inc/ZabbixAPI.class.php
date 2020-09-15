@@ -205,7 +205,7 @@ class ZabbixAPI {
      * Private init function, which is called to ensure our instance is initialized
      */
     private static function __init() {
-        if (get_class(self::$instance) != "ZabbixAPI")
+        if (!self::$instance)
             self::$instance = new ZabbixAPI();
     }
     
