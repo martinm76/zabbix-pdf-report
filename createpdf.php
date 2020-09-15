@@ -162,6 +162,34 @@ fwrite($fh, $stringData);
 #fwrite($fh, $stringData);
 fclose($fh);
 
+function sanitiseString($string, $wordLimit = 0){
+  $separator = '-';
+  
+  if($wordLimit != 0){
+      $wordArr = explode(' ', $string);
+      $string = implode(' ', array_slice($wordArr, 0, $wordLimit));
+  }
+
+  $quoteSeparator = preg_quote($separator, '#');
+
+  $trans = array(
+      '&.+?;'                    => '',
+      '[^\w\d _-]'            => '',
+      '\s+'                    => $separator,
+      '('.$quoteSeparator.')+'=> $separator
+  );
+
+  $string = strip_tags($string);
+  foreach ($trans as $key => $val){
+      $string = preg_replace('#'.$key.'#i'.'u', $val, $string);
+  }
+
+  $string = strtolower($string);
+
+  return trim(trim($string, $separator));
+}
+
+
 if ($reporttype == 'host') {
 	if (!is_numeric($hostid)) { echo "ERROR: Need hostid for host report!</br>\n"; exit; }
 	$hosts  = ZabbixAPI::fetch_array('host','get',array('output'=>array('hostid','name'),'with_graphs'=>'true','hostids'=>$hostid))
@@ -169,7 +197,7 @@ if ($reporttype == 'host') {
 	//var_dump($hosts);
 	// Get name to be used in PLACEHOLDER-part of filename
 	$name = $hosts[0]['name'];
-	$reportname=rawurlencode($name);
+	$reportname=sanitiseString($name);
 	CreatePDF($hosts);
 }
 elseif ($reporttype == 'hostgroup') {
@@ -181,7 +209,7 @@ elseif ($reporttype == 'hostgroup') {
 		or die('Unable to get hostgroup: '.print_r(ZabbixAPI::getLastError(),true));
 	//var_dump($hostgroupname);
 	$name = $hostgroupname[0]['name'];
-	$reportname=rawurlencode($name);
+	$reportname=sanitiseString($name);
 	CreatePDF($hosts);
 }
 else {
