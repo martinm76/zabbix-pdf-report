@@ -8,8 +8,16 @@ If in doubt: mkdir tmp reports; chmod 777 tmp reports
 I have tried to prepare fixrights.sh for SELinux being active on the system. It may or may not be enough to allow report generation.
 If you fail to get the PDF's generated, try disabling SELinux for a while:
 
+Temporary disable the SELinux Mode: (Only Applicable for Enterprise Linux (EL) like RHEL, CentOS, Oracle Linux, etc.
+
 ```
 setenforce 0
+```
+
+After that Check the SElinux Status
+
+```
+sestatus
 ```
 
 You need various PHP modules installed for this to work. You may often have to install these yourself:
@@ -17,7 +25,10 @@ You need various PHP modules installed for this to work. You may often have to i
 php-curl 
 php-json
 
-(package name may vary and in some cases include a PHP version)
+Some package name may vary and in some cases include a PHP version. For example in this case Replace 7.4 with your PHP version number::
+
+php7.4-curl 
+php7.4-json
 
 New User
 ========
