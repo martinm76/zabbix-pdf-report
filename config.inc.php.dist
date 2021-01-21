@@ -24,7 +24,7 @@ $myitemgraphs = '#(Utilization of|farm connection|Average Latency|Number of proc
 # zabbix server info(user must have API access)
 $z_server 	= 'http://localhost/zabbix/';
 // $z_server 	= 'https://YourServerHere/zabbix/'; // Replace YourServerHere with either en IP or an FDQN (e.g. zabbix.company.com). Remove the s in https if for some reason you don't use https yet. Or better yet, get Let's Encrypt installed and use https!
-$z_user		= 'Admin';
+$z_user		= 'Admin'; // Update this. Default User for Admin is Admin. If you have differnt user other than Admin you should modify this.
 $z_pass		= 'YourPasswordHere'; // Update this. Default PW for Admin is zabbix
 
 
