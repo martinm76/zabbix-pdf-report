@@ -242,7 +242,7 @@ function CreatePDF($hostarray) {
 						switch ($type) {
 							case 'bytes': $value=formatBytes($value); $type='string'; break;
 							case 'seconds': $value=secondsToTime($value); break;
-							case 'ms': $value = round($value*1000,2) . " ms"; $tval = round($tval*1000,2) . " ms"; break;
+							case 'ms': if ($value < 8 ) { $value = round($value*1000,2) . " ms"; $tval = round($tval*1000,2) . " ms"; } else { $value = $value . " ms" ; $tval = $tval . " ms" ; } ; break;
 							case 'number': $value = round($value,2) . " " . $unit ; break;
 							case 'datetime': $value = date("Y-m-d H:i:s", $value); break;
 							case 'updown': $value = updown($value); break;
@@ -286,8 +286,13 @@ function CreatePDF($hostarray) {
 						$otype=$type;
 						$trend_obj = ZabbixAPI::fetch('trend','get',array('output'=>array('itemid','num','value_min','value_avg','value_max'), 'itemids'=>$val['itemid'], 'time_from'=>$starttime, 'time_till'=>$endtime));
 //						if ($debug) { echo "<B>Trend data for $name:</B><BR>\n<pre>" ; print_r($trend_obj) ; echo "</pre></p>"; }
-						$tval = z_sum($trend_obj,'value_avg',false)/count($trend_obj);
-						if ($debug) { echo "<EM>Trend value for $name (avg): $tval</EM><p>"; }
+						if (count($trend_obj) <= 1 ) {
+							$tval="No trend data found.";
+							$type="string";
+						} else {
+							$tval = z_sum($trend_obj,'value_avg',false)/count($trend_obj);
+						}
+						if ($debug) { echo "<EM>Trend value for $name (avg): $tval</EM> (" . count($trend_obj) . " data points)<p>"; }
 						if ($type == 'bits') {
 							$value=formatBits($value);
 							$type='string';
@@ -301,7 +306,7 @@ function CreatePDF($hostarray) {
 						$id=$val['itemid'];
 						switch ($type) {
 							case 'seconds': $value=secondsToTime($value); $tval=secondsToTime(floor($tval)); break;
-							case 'ms': $value = round($value*1000,2) . " ms"; $tval = round($tval*1000,2) . " ms"; break;
+							case 'ms': if ($value < 8 ) { $value = round($value*1000,2) . " ms"; $tval = round($tval*1000,2) . " ms"; } else { $value = $value . " ms" ; $tval = $tval . " ms" ; } ; break;
 							case 'number': $value = round($value,2) . " " . $unit; $tval = round($tval,2) . " " . $unit; break;
 							case 'datetime': $value = date("Y-m-d H:m:s", $value); $tval=date("Y-m-d H:m:s", floor($tval)) ; break;
 							case 'updown': $value = updown($value) ; $tval=percent(round($tval,2)); break;
@@ -316,7 +321,11 @@ function CreatePDF($hostarray) {
 
 						$stringData=$dateval . "<b>" . $name . " :</b> latest value: " . $value . "\n";
 						fwrite($fh, $stringData);
-						$stringData=$dateval . "<b>" . $name . "</b> trend/SLA: " . $tval . "\n";
+						if (count($trend_obj) > 1) {
+							$stringData=$dateval . "<b>" . $name . "</b> trend/SLA: " . $tval . " (" . count($trend_obj) . " data points)\n";
+						} else {
+							$stringData=$dateval . "<b>" . $name . "</b> trend/SLA: " . $tval . "\n";
+						}
 						fwrite($fh, $stringData);
 						$type=$otype;
 

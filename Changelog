@@ -151,6 +151,11 @@
 2020-07-28 Martin Møller <martin.moller@pwc.com> - Update to v1.2.3
 	* Fixed it so that $2 in item graphs gets resolved.
 
+2021-01-20 Martin Møller <martin.moller@pwc.com> - Update to v1.2.4
+	* Tried to make trends/SLA more robust and provide information on
+	number of data points used to generate it.
+	* Extra code to assume milliseconds are not a fraction if value over 8
+
 PLANNED:
 	* Look into excluding headlines for empty sections (requires rewriting
 	some parts of the generator code).
