@@ -286,12 +286,7 @@ function CreatePDF($hostarray) {
 						$otype=$type;
 						$trend_obj = ZabbixAPI::fetch('trend','get',array('output'=>array('itemid','num','value_min','value_avg','value_max'), 'itemids'=>$val['itemid'], 'time_from'=>$starttime, 'time_till'=>$endtime));
 //						if ($debug) { echo "<B>Trend data for $name:</B><BR>\n<pre>" ; print_r($trend_obj) ; echo "</pre></p>"; }
-						if (count($trend_obj) <= 1 ) {
-							$tval="No trend data found.";
-							$type="string";
-						} else {
-							$tval = z_sum($trend_obj,'value_avg',false)/count($trend_obj);
-						}
+						$tval = z_sum($trend_obj,'value_avg',false)/count($trend_obj);
 						if ($debug) { echo "<EM>Trend value for $name (avg): $tval</EM> (" . count($trend_obj) . " data points)<p>"; }
 						if ($type == 'bits') {
 							$value=formatBits($value);
@@ -324,7 +319,7 @@ function CreatePDF($hostarray) {
 						if (count($trend_obj) > 1) {
 							$stringData=$dateval . "<b>" . $name . "</b> trend/SLA: " . $tval . " (" . count($trend_obj) . " data points)\n";
 						} else {
-							$stringData=$dateval . "<b>" . $name . "</b> trend/SLA: " . $tval . "\n";
+							$stringData=$dateval . "<b>" . $name . "</b> trend/SLA: no trend data found\n";
 						}
 						fwrite($fh, $stringData);
 						$type=$otype;
