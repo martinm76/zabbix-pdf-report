@@ -11,34 +11,36 @@
 
 include("config.inc.php");
 
+
+
 if ( $user_login == 1 ) {
-session_start();
-//print_r($_SESSION);
-if ( $allow_localhost == 1 ) {
-	if ( $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
-		$z_user=$_SESSION['username'];
-		$z_pass=$_SESSION['password'];
-	}
-} else {
-	$z_user=$_SESSION['username'];
-	$z_pass=$_SESSION['password'];
-}
+  session_start();
+  //print_r($_SESSION);
+  if ( $allow_localhost == 1 ) {
+    if ( $_SERVER['REMOTE_ADDR'] != '127.0.0.1') {
+      $z_user=$_SESSION['username'];
+      $z_pass=$_SESSION['password'];
+    }
+  } else {
+    $z_user=$_SESSION['username'];
+    $z_pass=$_SESSION['password'];
+  }
 
-/*
-if ( $z_user == "" ) {
-  print_r($_SERVER);
-  print_r($_POST);
-  print_r($_GET);
-  exit(0);
-  $z_user=$_POST['username'];
-  $z_pass=$_POST['password'];
-}
-*/
-if ( $z_user == "" ) {
-  header("Location: index.php");
-}
+  /*
+  if ( $z_user == "" ) {
+    print_r($_SERVER);
+    print_r($_POST);
+    print_r($_GET);
+    exit(0);
+    $z_user=$_POST['username'];
+    $z_pass=$_POST['password'];
+  }
+  */
+  if ( $z_user == "" ) {
+    header("Location: index.php");
+  }
 
-$z_login_data	= "name=" .$z_user ."&password=" .$z_pass ."&autologin=1&enter=Sign+in";
+  $z_login_data	= "name=" .$z_user ."&password=" .$z_pass ."&autologin=1&enter=Sign+in";
 }
 
 global $z_user, $z_pass, $z_login_data;
@@ -52,63 +54,82 @@ include ("inc/pdf.functions.php");
 error_reporting(E_ALL);
 set_time_limit(1800);
 
-// Process GET variables
-if (isset($_GET['GraphsOn'])) { $GraphsOn="yes"; }
-if (isset($_GET['ItemGraphsOn'])) { $ItemGraphsOn="yes"; }
-if (isset($_GET['TriggersOn'])) { $TriggersOn="yes"; }
-if (isset($_GET['ItemsOn'])) { $ItemsOn="yes"; }
-if (isset($_GET['TrendsOn'])) { $TrendsOn="yes"; }
+if (php_sapi_name() == "cli") {
+  // test
+  // $GraphsOn = "yes";
+  // $ItemGraphsOn = "yes";
+  // $ItemsOn = "no";
+  $debug = false;
+  $hostid = "10866";
+  $reporttype="host";
+  $timeperiod = '86400';
+  $starttime = time() - $timeperiod;
+  $stime      = date('YmdHis',$starttime);
+  $endtime   = time();
+  $mygraphs = "#(Ping|CPU+load|CPU+usage|CPU+util|processor|Disk+space|Swap|Ethernet|Memory+usage|^Traffic+on+|traffic+on+eth)";
+  $myitems2 = "#(Utilization+of|farm+connection|Average+Latency|Number+of+processes|Cache+%+Hit)";
 
-if (isset($_GET['debug']))	 { $debug	= true; }
-else				 { $debug	= false; }
-if (isset($_GET['HostID']))	 { $hostid	= filter_input(INPUT_GET,'HostID', FILTER_SANITIZE_STRING); }
-if (isset($_GET['GroupID']))	 { $groupid	= filter_input(INPUT_GET,'GroupID', FILTER_SANITIZE_STRING); }
-if (isset($_GET['ReportType']))  { $reporttype	= filter_input(INPUT_GET,'ReportType', FILTER_SANITIZE_STRING); }
-if (isset($_GET['ReportRange'])) {
-	if ($_GET['ReportRange'] == "last") {
-		$timeperiod		= filter_input(INPUT_GET,'timePeriod', FILTER_SANITIZE_STRING);
-		// Format $timeperiod into seconds
-		if    ($timeperiod == 'Hour')		{ $timeperiod = '3600';     }
-		elseif($timeperiod == 'Day')		{ $timeperiod = '86400';    }
-		elseif($timeperiod == 'PrevDay')	{ $timeperiod = '86400';    }
-		elseif($timeperiod == 'Week')		{ $timeperiod = '604800';   }
-		elseif($timeperiod == 'PrevWeek')	{ $timeperiod = '604800';   }
-		elseif($timeperiod == 'Month')		{ $timeperiod = '2678400';  }
-		elseif($timeperiod == 'PrevMonth')	{ $timeperiod = '2678400';  }
-		elseif($timeperiod == 'Year')		{ $timeperiod = '31536000'; }
-		$starttime = time() - $timeperiod;
-		$stime      = date('YmdHis',$starttime);
-		$endtime   = time();
-	}
-	elseif ($_GET['ReportRange'] == "custom") {
-		//var_dump($_GET);
-		// TODO: Check if start/end is empty
-		if (isset($_GET['startdate'])) {
-			if ($_GET['startdate'] == "") {
-				echo "<font color=\"red\"><h1>Startdate is missing!</h1></font></br>\n";
-				echo "When setting custom report period, startdate is required</br>\n";
-				exit;
-			}
-		}
-		$starttime  = strtotime($_GET['startdate'] . " " . $_GET['starttime']);
-		$stime      = date('YmdHis',$starttime);
-		$endtime    = strtotime($_GET['enddate'] . " " . $_GET['endtime']);
-		$timeperiod = $endtime - $starttime;
-		if ($starttime > $endtime) {
-			echo "<font color=\"red\"><h1>Startdate need to be before tomorrow or end date!</h1></font></br>\n";
-			exit;
-		} elseif ($endtime - $starttime < 3600) {
-			echo "<font color=\"red\"><h1>Time frame need to be minimum 1 hour!</h1></font></br>\n";
-			exit;
-		}
-	}
-	else {
-		echo "Unknown time report range!\n";
-		exit;
-	}
+} 
+else {
+  // Process GET variables
+  if (isset($_GET['GraphsOn'])) { $GraphsOn="yes"; }
+  if (isset($_GET['ItemGraphsOn'])) { $ItemGraphsOn="yes"; }
+  if (isset($_GET['TriggersOn'])) { $TriggersOn="yes"; }
+  if (isset($_GET['ItemsOn'])) { $ItemsOn="yes"; }
+  if (isset($_GET['TrendsOn'])) { $TrendsOn="yes"; }
+
+  if (isset($_GET['debug']))	 { $debug	= true; }
+  else				 { $debug	= false; }
+  if (isset($_GET['HostID']))	 { $hostid	= filter_input(INPUT_GET,'HostID', FILTER_SANITIZE_STRING); }
+  if (isset($_GET['GroupID']))	 { $groupid	= filter_input(INPUT_GET,'GroupID', FILTER_SANITIZE_STRING); }
+  if (isset($_GET['ReportType']))  { $reporttype	= filter_input(INPUT_GET,'ReportType', FILTER_SANITIZE_STRING); }
+  if (isset($_GET['ReportRange'])) {
+    if ($_GET['ReportRange'] == "last") {
+      $timeperiod		= filter_input(INPUT_GET,'timePeriod', FILTER_SANITIZE_STRING);
+      // Format $timeperiod into seconds
+      if    ($timeperiod == 'Hour')		{ $timeperiod = '3600';     }
+      elseif($timeperiod == 'Day')		{ $timeperiod = '86400';    }
+      elseif($timeperiod == 'PrevDay')	{ $timeperiod = '86400';    }
+      elseif($timeperiod == 'Week')		{ $timeperiod = '604800';   }
+      elseif($timeperiod == 'PrevWeek')	{ $timeperiod = '604800';   }
+      elseif($timeperiod == 'Month')		{ $timeperiod = '2678400';  }
+      elseif($timeperiod == 'PrevMonth')	{ $timeperiod = '2678400';  }
+      elseif($timeperiod == 'Year')		{ $timeperiod = '31536000'; }
+      $starttime = time() - $timeperiod;
+      $stime      = date('YmdHis',$starttime);
+      $endtime   = time();
+    }
+    elseif ($_GET['ReportRange'] == "custom") {
+      //var_dump($_GET);
+      // TODO: Check if start/end is empty
+      if (isset($_GET['startdate'])) {
+        if ($_GET['startdate'] == "") {
+          echo "<font color=\"red\"><h1>Startdate is missing!</h1></font></br>\n";
+          echo "When setting custom report period, startdate is required</br>\n";
+          exit;
+        }
+      }
+      $starttime  = strtotime($_GET['startdate'] . " " . $_GET['starttime']);
+      $stime      = date('YmdHis',$starttime);
+      $endtime    = strtotime($_GET['enddate'] . " " . $_GET['endtime']);
+      $timeperiod = $endtime - $starttime;
+      if ($starttime > $endtime) {
+        echo "<font color=\"red\"><h1>Startdate need to be before tomorrow or end date!</h1></font></br>\n";
+        exit;
+      } elseif ($endtime - $starttime < 3600) {
+        echo "<font color=\"red\"><h1>Time frame need to be minimum 1 hour!</h1></font></br>\n";
+        exit;
+      }
+    }
+    else {
+      echo "Unknown time report range!\n";
+      exit;
+    }
+  }
+
+  if (isset($_GET['mygraphs2'])) { $mygraphs=$_GET['mygraphs2']; } // Use the manually specified values for what graphs to show
+  if (isset($_GET['myitems2'])) { $myitemgraphs=$_GET['myitems2']; } // Use the manually specified values for what graphs to show
 }
-if (isset($_GET['mygraphs2'])) { $mygraphs=$_GET['mygraphs2']; } // Use the manually specified values for what graphs to show
-if (isset($_GET['myitems2'])) { $myitemgraphs=$_GET['myitems2']; } // Use the manually specified values for what graphs to show
 
 // Calculate report starttime and endtime
 $report_start	= date('Y.m.d H:i',$starttime);
@@ -232,13 +253,15 @@ $pdf = new Creport("$paper_format","$paper_orientation");
 
 $pdf -> ezSetMargins(35,50,50,50);
 
+$pdf -> isUnicode = true;
+
 // put a line top and bottom on all the pages
 $all = $pdf->openObject();
 $pdf->saveState();
 $pdf->setStrokeColor(0,0,0,1);
 $pdf->line(20,40,578,40);
 $pdf->line(20,822,578,822);
-$pdf->addText(50,34,6,'Generated by Zabbix Monitoring Dynamic Report v' . $version);
+// $pdf->addText(50,34,6,'Generated by Zabbix Monitoring Dynamic Report v' . $version);
 $pdf->restoreState();
 $pdf->closeObject();
 // note that object can be told to appear on just odd or even pages by changing 'all' to 'odd'
@@ -247,32 +270,34 @@ $pdf->addObject($all,'all');
 
 $pdf->ezSetDy(-100);
 
-//$mainFont = './fonts/Helvetica.afm';
-$mainFont = './fonts/Times-Roman.afm';
-$codeFont = './fonts/Courier.afm';
+$mainFont = './fonts/pingfang.ttf';
+// $mainFont = './fonts/Times-Roman.afm';
+$codeFont = './fonts/ibmplexmono_regular.afm';
 $images = '';
 
 // select a font
 $pdf->selectFont($mainFont);
 
-$pdf->ezText("$company_name Zabbix Report",(40-strlen($company_name)),array('justification'=>'centre'));
+$pdf->ezText("$company_name",40,array('justification'=>'centre'));
 $pdf->ezText("",14,array('justification'=>'centre'));
-$pdf->ezText("for",16,array('justification'=>'centre'));
+// $pdf->ezText("for",16,array('justification'=>'centre'));
 $pdf->ezText("",14,array('justification'=>'centre'));
-$pdf->ezText("$name",40,array('justification'=>'centre'));
+$pdf->ezText("$name 运行状态报告",20,array('justification'=>'centre'));
 $pdf->ezText("",14,array('justification'=>'centre'));
-$pdf->ezText("generated on",14,array('justification'=>'centre'));
+$pdf->ezText("报告周期",14,array('justification'=>'centre'));
 $pdf->ezText("",14,array('justification'=>'centre'));
-$pdf->ezText(date('l jS \of F Y \a\t H:i'),19,array('justification'=>'centre'));
+$pdf->ezText("$report_start -- $report_end",14,array('justification'=>'centre'));
+$pdf->ezText("",14,array('justification'=>'centre'));
+// $pdf->ezText(date('l jS \of F Y \a\t H:i'),19,array('justification'=>'centre'));
 //$pdf->ezText("(Version " . $version . ")",14,array('justification'=>'centre'));
 
 $pdf->openHere('Fit');
 
-company_logo($pdf,150,$pdf->y-80,80,150,200);
+// company_logo($pdf,200,$pdf->y,40,0,0);
 
-$pdf->ezSetDy(-400);
-$pdf->ezText("Report start  : $report_start",14,array('justification'=>'right'));
-$pdf->ezText("Report end   : $report_end",14,array('justification'=>'right'));
+// $pdf->ezSetDy(-400);
+// $pdf->ezText("Report start  : $report_start",14,array('justification'=>'right'));
+// $pdf->ezText("Report end   : $report_end",14,array('justification'=>'right'));
 
 $pdf->selectFont($mainFont);
 
@@ -354,7 +379,8 @@ foreach ($data as $key => $line){
           $thisPageNum = $pdf->ezPageCount;
           $pdf->saveState();
           $pdf->setColor(0.9,0.9,0.9);
-          $pdf->filledRectangle($pdf->ez['leftMargin'],$pdf->y-$pdf->getFontHeight(18)+$pdf->getFontDecender(18),$pdf->ez['pageWidth']-$pdf->ez['leftMargin']-$pdf->ez['rightMargin'],$pdf->getFontHeight(18));
+          // $pdf->filledRectangle($pdf->ez['leftMargin'],$pdf->y-$pdf->getFontHeight(18)+$pdf->getFontDecender(18),$pdf->ez['pageWidth']-$pdf->ez['leftMargin']-$pdf->ez['rightMargin'],$pdf->getFontHeight(18));
+          $pdf->filledRectangle($pdf->ez['leftMargin'],$pdf->y-$pdf->getFontHeight(21),$pdf->ez['pageWidth']-$pdf->ez['leftMargin']-$pdf->ez['rightMargin'],$pdf->getFontHeight(18));
           $pdf->restoreState();
           $pdf->ezText($tmp2,18,array('justification'=>'centre'));
           if ($pdf->ezPageCount==$thisPageNum){

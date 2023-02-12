@@ -76,7 +76,7 @@ function z_sum($arr,$col,$debugme=false) {
 	return $sum;
 }
 
-function GetGraphImageById ($graphs, $stime, $period = 3600, $width, $height, $filename) {
+function GetGraphImageById ($graphs, $stime, $period, $width, $height, $filename) {
 	global $z_server, $z_user, $z_pass, $z_tmp_cookies, $z_url_index, $z_url_graph, $z_url_api, $z_login_data;
 	// file names
 	$filename_cookie = tempnam($z_tmp_cookies,"zabbix_cookie_");
@@ -110,7 +110,7 @@ function GetGraphImageById ($graphs, $stime, $period = 3600, $width, $height, $f
 	//}
 }
 
-function GetItemImageById ($graphs, $stime, $period = 3600, $width, $height, $filename) {
+function GetItemImageById ($graphs, $stime, $period, $width, $height, $filename) {
 	global $z_server, $z_user, $z_pass, $z_tmp_cookies, $z_url_index, $z_item_graph, $z_url_api, $z_login_data;
 	// file names
 	$filename_cookie = tempnam($z_tmp_cookies,"zabbix_cookie_");

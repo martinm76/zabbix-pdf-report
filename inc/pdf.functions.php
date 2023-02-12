@@ -1,11 +1,16 @@
 <?php
+
 // define a clas extension to allow the use of a callback to get the table of contents, and to put the dots in the toc
 class Creport extends Cezpdf {
   var $reportContents = array();
 
-  function Creport($p,$o){
-    $this->Cezpdf($p,$o);
+  function __construct($p, $o) {
+    parent::__construct($p, $o, 'none', []);
   }
+
+  // function Creport($p,$o){
+  //   $this->Cezpdf($p,$o);
+  // }
 
   function rf($info){
     // this callback records all of the table of contents entries, it also places a destination marker there
@@ -48,16 +53,17 @@ function company_logo(&$pdf,$x,$y,$height,$wl=0,$wr=0){
   $pdf->saveState();
   if ( ! $hide_company_name ) {
     $h=100;
-    $scaler=strlen($company_name)/6; 
-    if ( $scaler < 1 ) {
-      $scaler = 1;
-    }
+    // $scaler=strlen($company_name)/6; 
+    // if ( $scaler < 1 ) {
+    //   $scaler = 1;
+    // }
+    $scaler = 1;
     $factor = $height/($h*$scaler);
     $pdf->selectFont('./fonts/Helvetica-Bold.afm');
     $text = $company_name;
     $ts=100*$factor;
     $th = $pdf->getFontHeight($ts);
-    $td = $pdf->getFontDecender($ts);
+    $td = $pdf->getFontDescender($ts);
     $tw = $pdf->getTextWidth($ts,$text);
     $pdf->setColor(212/255,0/255,0/255);
     $z = 0.86;
@@ -65,7 +71,7 @@ function company_logo(&$pdf,$x,$y,$height,$wl=0,$wr=0){
     $pdf->setColor(255/255,255/255,255/255);
     $pdf->addText($x,$y-$th*0.85-$td,$ts,$text);
     $pdf->setColor(212/255,0/255,0/255);
-    $pdf->addText($x,$y-$th-$td,$ts*0.1,'');
+    $pdf->addText($x,$y-$th,$ts*0.1,'');
     $pdf->restoreState();
   }
   return $height;
