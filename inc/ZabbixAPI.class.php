@@ -248,7 +248,7 @@ class ZabbixAPI {
         self::$instance->last_error = false;
         
         // Make sure we're logged in, or trying to login...
-        if ($this->auth_hash == NULL && $method != 'user.login')
+        if ($this->auth_hash == NULL && $method != 'user.login' && $method != 'apiinfo.version' )
             return false;  // If we're not logged in, no wasting our time here
         
         // Try to retrieve this...
@@ -281,8 +281,14 @@ class ZabbixAPI {
      * Private login function to perform the login
      */
     private function __login() {
-        // Try to login to our API
-        $data = $this->__callAPI('user.login', array( 'password' => $this->password, 'user' => $this->username ));
+	    // Try to login to our API
+	    $api = $this->__callAPI('apiinfo.version', array( 'id' => 1)); // How to log in depends on the Zabbix version. 6.4 and newer used new syntax.
+	    $version = intval(str_replace(".", "", $api));
+	    if ( $version < 640 ) {
+		    $data = $this->__callAPI('user.login', array( 'password' => $this->password, 'user' => $this->username ));
+	    } else {
+		    $data = $this->__callAPI('user.login', array( 'password' => $this->password, 'username' => $this->username ));
+	    }
         
         if ($this->debug)
             echo "__login() Got response from API: ($data)\n";
