@@ -224,6 +224,57 @@ class ZabbixAPI {
     /**
      * Builds a JSON-RPC request, designed just for Zabbix
      */
+    private static function __buildAPIVersionJSONRequest($method, $params = array()) {
+        // This is our default JSON array
+        $request = array(
+            'method' => 'apiinfo.version',
+            'id' => 1, 
+            'params' => ( array() ),
+            'jsonrpc' => "2.0"
+        );
+        // Return our request, in JSON format
+        return json_encode($request);
+    }
+
+    /**
+     * The private function that performs the call to a remote RPC/API call
+     */
+    private function __APIVersion() {
+        // Initialize instance if it isn't already, so no fatal PHP errors
+        self::__init();
+        
+        // Reset our "last error" variable
+        self::$instance->last_error = false;
+        
+        // Try to retrieve this...
+        $data = self::__jsonRequest( 
+            $this->url.self::ZABBIX_API_URL, 
+            self::__buildAPIVersionJSONRequest( $method, $params )
+        );
+        
+        if ($this->debug)
+            echo "Got response from API: ($data)\n";
+        
+        // Convert return data (JSON) to PHP array
+        $decoded_data = json_decode($data, true);
+        
+        if ($this->debug)
+            echo "Response decoded: (".print_r($decoded_data,true)."\n";
+        
+        // Return the data if it's valid
+        if ( isset($decoded_data['id']) && $decoded_data['id'] == 1 && !empty($decoded_data['result']) ) {
+            return $decoded_data['result'];
+        } else {
+            // If we had a actual error, put it in our instance to be able to be retrieved/queried
+            if (!empty($decoded_data['error']))
+                self::$instance->last_error = $decoded_data['error'];
+            return false;
+        }
+    }
+    
+    /**
+     * Builds a JSON-RPC request, designed just for Zabbix
+     */
     private static function __buildJSONRequest($method, $params = array()) {
         // This is our default JSON array
         $request = array(
@@ -248,7 +299,7 @@ class ZabbixAPI {
         self::$instance->last_error = false;
         
         // Make sure we're logged in, or trying to login...
-        if ($this->auth_hash == NULL && $method != 'user.login' && $method != 'apiinfo.version' )
+        if ($this->auth_hash == NULL && $method != 'user.login' )
             return false;  // If we're not logged in, no wasting our time here
         
         // Try to retrieve this...
@@ -282,8 +333,11 @@ class ZabbixAPI {
      */
     private function __login() {
 	    // Try to login to our API
-	    $api = $this->__callAPI('apiinfo.version', array( 'id' => 1)); // How to log in depends on the Zabbix version. 6.4 and newer used new syntax.
+	    $api = $this->__APIVersion(); // How to log in depends on the Zabbix version. 6.4 and newer used new syntax.
 	    $version = intval(str_replace(".", "", $api));
+	    if ($this->debug) {
+		    echo "API Version returned : $api, converted to integer as : $version\n<br/>";
+	    }
 	    if ( $version < 640 ) {
 		    $data = $this->__callAPI('user.login', array( 'password' => $this->password, 'user' => $this->username ));
 	    } else {
