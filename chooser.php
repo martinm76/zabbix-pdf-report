@@ -138,8 +138,33 @@ ZabbixAPI::login($z_server,$z_user,$z_pass)
 //fetch graph data host
 $hosts       = ZabbixAPI::fetch_array('host','get',array('output'=>array('hostid','name'),'sortfield'=>'host','with_graphs'=>'1','sortfield'=>'name'))
 	or die('Unable to get hosts: '.print_r(ZabbixAPI::getLastError(),true));
-$host_groups = ZabbixAPI::fetch_array('hostgroup','get', array('output'=>array('groupid','name'),'real_hosts'=>'1','with_graphs'=>'1','sortfield'=>'name') )
-	or die('Unable to get hosts: '.print_r(ZabbixAPI::getLastError(),true));
+if ( $zabbix_version >= 6.2 ) {
+        $host_groups = ZabbixAPI::fetch_array('hostgroup', 'get', array( 'output' => array('groupid', 'name'), 'sortfield' => 'name'))
+                or die('Unable to get host groups: ' . print_r(ZabbixAPI::getLastError(), true));      
+  // Now, iterate over these groups to filter them according to specific criteria.
+  $filtered_host_groups = [];
+  foreach ($host_groups as $group) {
+    // Make an API call to fetch hosts by group that have graphs. Adjust this part according to your implementation.
+    $hosts = ZabbixAPI::fetch_array('host', 'get', array(
+      'output' => 'extend',
+      'groupids' => $group['groupid'],
+      'with_graphs' => '1' // Assuming this filter can be applied here. Adjust as needed.
+    ));
+
+    // If hosts with graphs were found in the group, then include the group in the filtered list.
+    if (!empty(array_filter($hosts))) {
+//          print_r($hosts);
+      $filtered_host_groups[] = $group;
+    }
+  }
+
+  // Reassign the filtered groups back to $host_groups so the rest of the code is unaffected.
+  $host_groups = $filtered_host_groups;
+#  print_r($host_groups);
+} else {
+    $host_groups = ZabbixAPI::fetch_array('hostgroup','get', array('output'=>array('groupid','name'),'real_hosts'=>'1','with_graphs'=>'1','sortfield'=>'name') )
+            or die('Unable to get hosts: '.print_r(ZabbixAPI::getLastError(),true));
+}
 ZabbixAPI::logout($z_server,$z_user,$z_pass)
 	or die('Unable to logout: '.print_r(ZabbixAPI::getLastError(),true));
 
