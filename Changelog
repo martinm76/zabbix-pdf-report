@@ -156,6 +156,11 @@
 	number of data points used to generate it.
 	* Extra code to assume milliseconds are not a fraction if value over 8
 
+2024-05-19 Martin Mølller <martin.moller@pwc.com> - Update to v1.2.5
+        * Fixed an issue with hostgroups on Zabbix 6.2 and newer (initial code provided in issue #37)
+        * Went through pull requests, accepted two and declined one. Minor modifications to config.inc.php.dist and README.md
+        * Looked through open issues. Closed several and updated those with some relevance still
+
 PLANNED:
 	* Look into excluding headlines for empty sections (requires rewriting
 	some parts of the generator code).
