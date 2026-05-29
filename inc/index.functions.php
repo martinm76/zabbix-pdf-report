@@ -1,63 +1,77 @@
 <?php
-// FUNCTIONS
-function ReadArray($array) {
-	foreach($array as $key=>$value) {
-		$name = $array[$key]['name'];
-		if (isset($array[$key]['hostid'])) {
-			$id   = $array[$key]['hostid'];
-		}
-		elseif (isset($array[$key]['groupid'])) {
-			$id   = $array[$key]['groupid'];
-		}
-		else {
-			$id   = $name;
-		}
-		echo "<option value=\"$id\">$name</option>\n";
-	}
-}
+/**
+ * zabbix-pdf-report — 2.x
+ * Helpers for the chooser / index pages.
+ */
+declare(strict_types=1);
 
-function array_flatten($array) {
-
-	$output = array();
-	array_walk_recursive($array, function ($current) use (&$output) {
-    $output[] = $current;
-});
-   return $output;
-}
-
-function listdir_by_date($path){
-    $dir = opendir($path);
-    $list = array();
-    while($file = readdir($dir)){
-        if ($file != '.' and $file != '..'){
-            // add the filename, to be sure not to
-            // overwrite a array key
-            $ctime = filemtime("$path/$file") . ',' . $file;
-            $list[$ctime] = $file;
-        }
+/**
+ * @param array<int,array<string,mixed>> $rows
+ */
+function ReadArray(array $rows): void
+{
+    foreach ($rows as $row) {
+        $name = (string) ($row['name'] ?? '');
+        $id   = $row['hostid'] ?? $row['groupid'] ?? $name;
+        echo '<option value="' . htmlspecialchars((string) $id, ENT_QUOTES, 'UTF-8') . '">'
+            . htmlspecialchars($name, ENT_QUOTES, 'UTF-8') . "</option>\n";
     }
-    closedir($dir);
+}
+
+/**
+ * @param array<mixed> $array
+ * @return array<int,mixed>
+ */
+function array_flatten(array $array): array
+{
+    $output = [];
+    array_walk_recursive($array, static function ($current) use (&$output): void {
+        $output[] = $current;
+    });
+    return $output;
+}
+
+/**
+ * @return array<string,string>  [mtime,filename → filename]
+ */
+function listdir_by_date(string $path): array
+{
+    $list = [];
+    $dh = @opendir($path);
+    if ($dh === false) {
+        return $list;
+    }
+    while (($file = readdir($dh)) !== false) {
+        if ($file === '.' || $file === '..') {
+            continue;
+        }
+        $list[filemtime("$path/$file") . ',' . $file] = $file;
+    }
+    closedir($dh);
     krsort($list);
     return $list;
 }
 
-function ListOldReports($dir) {
-	global $z_user, $hosts, $host_groups;
-	#$dir_files = array_diff(scandir($dir), array('..', '.'));
-	$dir_files = listdir_by_date($dir);
-	echo "<thead>";
-	echo "<tr><th>Report timestamp</th><th align=\"left\">Report</th></tr>\n";
-	echo "</thead>";
-	echo "<tbody>";
-	foreach ($dir_files as $fdate => $fname) {
-		$fdate = explode(",",$fdate);
-		$fdate = date("Y.m.d H:i:s", $fdate[0]);
-		$name=substr(rawurldecode($fname), 0, -4);
-		$url=rawurlencode($fname);
-		if ((in_array($name, array_flatten($hosts)) or (in_array($name, array_flatten($host_groups))))) {
-			echo "<tr><td>$fdate</td><td align=\"left\"><a href=\"reports/$url\">$name</a></td></tr>\n";
-		}
-	}
-	echo "</tbody>";
+function ListOldReports(string $dir): void
+{
+    global $z_user, $hosts, $host_groups;
+
+    echo "<thead><tr><th>Report timestamp</th><th align=\"left\">Report</th></tr></thead>\n<tbody>\n";
+    foreach (listdir_by_date($dir) as $fdate => $fname) {
+        $parts = explode(',', $fdate, 2);
+        $stamp = date('Y.m.d H:i:s', (int) $parts[0]);
+        $name  = substr(rawurldecode($fname), 0, -4);
+        $url   = rawurlencode($fname);
+
+        $hostsFlat  = is_array($hosts ?? null)       ? array_flatten($hosts)       : [];
+        $groupsFlat = is_array($host_groups ?? null) ? array_flatten($host_groups) : [];
+
+        if (in_array($name, $hostsFlat, true) || in_array($name, $groupsFlat, true)) {
+            $safeName = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+            echo "<tr><td>$stamp</td><td align=\"left\"><a href=\"reports/$url\">$safeName</a></td></tr>\n";
+        }
+    }
+    echo "</tbody>\n";
 }
+
 ?>

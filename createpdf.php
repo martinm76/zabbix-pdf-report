@@ -49,7 +49,14 @@ include ("inc/class.ezpdf.php");
 include ("inc/pdf.functions.php");
 
 // ERROR REPORTING
-error_reporting(E_ALL);
+//error_reporting(E_ALL);
+
+// ezPDF v009 (~2003) is not PHP 8 clean. We'll replace it with TCPDF in a
+// later step; until then, hide its deprecation noise so the report still
+// renders on PHP 8.1+. Real errors and warnings still surface.
+//error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
+error_reporting(E_ERROR | E_PARSE);  // suppress E_WARNING/E_NOTICE during PDF build
+
 set_time_limit(1800);
 
 // Process GET variables
@@ -61,12 +68,13 @@ if (isset($_GET['TrendsOn'])) { $TrendsOn="yes"; }
 
 if (isset($_GET['debug']))	 { $debug	= true; }
 else				 { $debug	= false; }
-if (isset($_GET['HostID']))	 { $hostid	= filter_input(INPUT_GET,'HostID', FILTER_SANITIZE_STRING); }
-if (isset($_GET['GroupID']))	 { $groupid	= filter_input(INPUT_GET,'GroupID', FILTER_SANITIZE_STRING); }
-if (isset($_GET['ReportType']))  { $reporttype	= filter_input(INPUT_GET,'ReportType', FILTER_SANITIZE_STRING); }
+// NEW (PHP 8.1+ compatible)
+$hostid     = isset($_GET['HostID'])     ? (string) (int) $_GET['HostID']  : null;
+$groupid    = isset($_GET['GroupID'])    ? (string) (int) $_GET['GroupID'] : null;
+$reporttype = isset($_GET['ReportType']) ? preg_replace('/[^a-z]/', '', strtolower((string) $_GET['ReportType'])) : null;
 if (isset($_GET['ReportRange'])) {
 	if ($_GET['ReportRange'] == "last") {
-		$timeperiod		= filter_input(INPUT_GET,'timePeriod', FILTER_SANITIZE_STRING);
+		$timeperiod = isset($_GET['timePeriod']) ? preg_replace('/[^A-Za-z]/', '', (string) $_GET['timePeriod']) : '';
 		// Format $timeperiod into seconds
 		if    ($timeperiod == 'Hour')		{ $timeperiod = '3600';     }
 		elseif($timeperiod == 'Day')		{ $timeperiod = '86400';    }
@@ -143,12 +151,18 @@ if ($debug) {
 }
 // get graphids
 // Login to Zabbix API using ZabbixAPI.class.php
-if ( $zabbix_version < 5.0 ) {
-  ZabbixAPI::debugEnabled(TRUE);
-}
 
-ZabbixAPI::login($z_server,$z_user,$z_pass)
-	or die('Unable to login: '.print_r(ZabbixAPI::getLastError(),true));
+ZabbixAPI::verifyTls($z_verify_tls);
+// Debug is now off by default — enable from query string only:
+if (isset($_GET['debug'])) { ZabbixAPI::debugEnabled(true); }
+
+if ($z_auth_mode === 'token') {
+    ZabbixAPI::login($z_server, '', $z_api_token)
+        or die('Unable to authenticate with API token: ' . print_r(ZabbixAPI::getLastError(), true));
+} else {
+    ZabbixAPI::login($z_server, $z_user, $z_pass)
+        or die('Unable to login: ' . print_r(ZabbixAPI::getLastError(), true));
+}
 
 #save graphs to directory for selected host
 $fh = fopen($tmp_pdf_data, 'w');

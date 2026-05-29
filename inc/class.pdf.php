@@ -33,7 +33,7 @@ var $objects = array();
 /**
 * the objectId (number within the objects array) of the document catalog
 */
-var $catalogId;
+var $catalogId = 0;
 /**
 * array carrying information about the fonts that the system currently knows about
 * used to ensure that a font is not loaded twice, among other things
@@ -54,15 +54,15 @@ var $currentFontNum=0;
 /**
 * 
 */
-var $currentNode;
+var $currentNode = 0;
 /**
 * object number of the current page
 */
-var $currentPage;
+var $currentPage = 0;
 /**
 * object number of the currently active contents block
 */
-var $currentContents;
+var $currentContents = 0;
 /**
 * number of fonts within the system
 */
@@ -194,13 +194,21 @@ var $checkpoint = '';
 * this will start a new document
 * @var array array of 4 numbers, defining the bottom left and upper right corner of the page. first two are normally zero.
 */
-function Cpdf ($pageSize=array(0,0,612,792)){
+//function Cpdf ($pageSize=array(0,0,612,792)){
+function __construct ($pageSize=array(0,0,612,792)){
   $this->newDocument($pageSize);
   
   // also initialize the font families that are known about already
   $this->setFontFamily('init');
 //  $this->fileIdentifier = md5('xxxxxxxx'.time());
 
+}
+
+// PHP 4-style alias for any code that calls $this->Cpdf(...) explicitly
+function Cpdf($pageSize=array(0,0,612,792)) {
+    // Inline the original constructor body to avoid any dispatch ambiguity.
+    $this->newDocument($pageSize);
+    $this->setFontFamily('init');
 }
 
 /**
@@ -1234,13 +1242,24 @@ function output($debug=0){
   $content="%PDF-1.3\n%âãÏÓ\n";
 //  $content="%PDF-1.3\n";
   $pos=strlen($content);
-  foreach($this->objects as $k=>$v){
-    $tmp='o_'.$v['t'];
-    $cont=$this->$tmp($k,'out');
-    $content.=$cont;
-    $xref[]=$pos;
-    $pos+=strlen($cont);
+
+  foreach ($this->objects as $k => $v) {
+    if (!is_array($v) || !isset($v['t']) || $v['t'] === '') {
+      //error_log("[ezPDF] malformed object at index '$k': " . var_export($v, true));
+      //// error_log("[ezPDF] but more useful: object keys = " . implode(',', array_keys($this->objects)));
+      continue;
+    }
+    $tmp = 'o_' . $v['t'];
+    if (!method_exists($this, $tmp)) {
+        error_log("[ezPDF] no method $tmp for object at index $k");
+        continue;
+    }
+    $cont = $this->$tmp($k, 'out');
+    $content .= $cont;
+    $xref[] = $pos;
+    $pos += strlen($cont);
   }
+
   $content.="\nxref\n0 ".(count($xref)+1)."\n0000000000 65535 f \n";
   foreach($xref as $p){
     $content.=substr('0000000000',0,10-strlen($p)).$p." 00000 n \n";
@@ -1510,11 +1529,11 @@ function selectFont($fontName,$encoding='',$set=1){
         // note that pdf supports only binary format type 1 font files, though there is a 
         // simple utility to convert them from pfa to pfb.
         $fp = fopen($fbfile,'rb');
-        $tmp = get_magic_quotes_runtime();
-        set_magic_quotes_runtime(0);
-        $data = fread($fp,filesize($fbfile));
-        set_magic_quotes_runtime($tmp);
-        fclose($fp);
+        $data = @file_get_contents($fbfile);
+        if ($data === false) {
+          $this->addMessage('could not read font ' . $file);
+          return;
+        }
 
         // create the font descriptor
         $this->numObj++;
@@ -2637,6 +2656,7 @@ function PRVT_getBytes(&$data,$pos,$num){
 function addPngFromFile($file,$x,$y,$w=0,$h=0){
   // read in a png file, interpret it, then add to the system
   $error=0;
+/* OLD
   $tmp = get_magic_quotes_runtime();
   ini_set("set_magic_quotes_runtime",0);
   $fp = @fopen($file,'rb');
@@ -2646,11 +2666,20 @@ function addPngFromFile($file,$x,$y,$w=0,$h=0){
       $data .= fread($fp,1024);
     }
     fclose($fp);
-  } else {
+ */
+  $fp = @fopen($file, 'rb');
+  if ($fp === false) {
+    $this->addMessage('addPngFromFile: cannot open file ' . $file);
+    return;
+  }
+  $data = stream_get_contents($fp);
+  fclose($fp);
+  if ($data === false) {
     $error = 1;
     $errormsg = 'trouble opening file: '.$file;
+    $this->addMessage('addPngFromFile: read failed for ' . $file);
+    return;
   }
-  ini_set("set_magic_quotes_runtime", $tmp);
   
   if (!$error){
     $header = chr(137).chr(80).chr(78).chr(71).chr(13).chr(10).chr(26).chr(10);
@@ -2850,6 +2879,7 @@ function addJpegFromFile($img,$x,$y,$w=0,$h=0){
     $h=$w*$imageHeight/$imageWidth;
   }
 
+  /* OLD
   $fp=fopen($img,'rb');
 
   $tmp = get_magic_quotes_runtime();
@@ -2860,6 +2890,20 @@ function addJpegFromFile($img,$x,$y,$w=0,$h=0){
   fclose($fp);
 
   $this->addJpegImage_common($data,$x,$y,$w,$h,$imageWidth,$imageHeight,$channels);
+*/
+  // NEW
+  $fp = fopen($img, 'rb');
+  if ($fp === false) {
+    $this->addMessage('addJpegFromFile: cannot open ' . $img);
+    return;
+  }
+  $data = stream_get_contents($fp);
+  fclose($fp);
+  if ($data === false) {
+    $this->addMessage('addJpegFromFile: read failed for ' . $img);
+    return;
+  }
+  $this->addJpegImage_common($data, $x, $y, $w, $h, $imageWidth, $imageHeight, $channels);
 }
 
 /**
@@ -2903,8 +2947,7 @@ function addImage(&$img,$x,$y,$w=0,$h=0,$quality=75){
   imagejpeg($img,$tmpName,$quality);
   $fp=fopen($tmpName,'rb');
 
-  $tmp = get_magic_quotes_runtime();
-  set_magic_quotes_runtime(0);
+/*
   $fp = @fopen($tmpName,'rb');
   if ($fp){
     $data='';
@@ -2916,9 +2959,14 @@ function addImage(&$img,$x,$y,$w=0,$h=0,$quality=75){
     $error = 1;
     $errormsg = 'trouble opening file';
   }
-//  $data = fread($fp,filesize($tmpName));
-  set_magic_quotes_runtime($tmp);
-//  fclose($fp);
+ */
+  $data = @file_get_contents($tmpName);
+  if ($data === false) {
+    $this->addMessage('addImage: cannot read ' . $file);
+    $error = 1;
+    $errormsg = 'trouble opening file';
+    return;
+  }
   unlink($tmpName);
   $this->addJpegImage_common($data,$x,$y,$w,$h,$imageWidth,$imageHeight);
 }

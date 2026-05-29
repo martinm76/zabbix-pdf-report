@@ -3,9 +3,15 @@
 class Creport extends Cezpdf {
   var $reportContents = array();
 
-  function Creport($p,$o){
-    $this->Cezpdf($p,$o);
-  }
+function __construct($p, $o) {
+    parent::__construct($p, $o);
+}
+
+// PHP 4-style alias for any code that calls $this->Creport(...) explicitly.
+// Body is inlined to avoid dynamic-dispatch recursion.
+function Creport($p, $o) {
+    parent::__construct($p, $o);
+}
 
   function rf($info){
     // this callback records all of the table of contents entries, it also places a destination marker there

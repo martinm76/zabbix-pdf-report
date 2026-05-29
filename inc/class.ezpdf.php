@@ -25,7 +25,19 @@ var $ezPageCount=0;
 
 // ------------------------------------------------------------------------------
 
-function Cezpdf($paper='a4',$orientation='portrait'){
+//function Cezpdf($paper='a4',$orientation='portrait'){
+function __construct($paper='a4',$orientation='portrait'){
+	error_log('[ezPDF] Cezpdf::__construct called, paper=' . (is_array($paper) ? 'array' : $paper));
+	// PHP 8 compatibility: ensure ez[] keys exist before any code reads them.
+        $this->ez += [
+            'pageWidth'    => 0,
+            'pageHeight'   => 0,
+            'topMargin'    => 0,
+            'bottomMargin' => 0,
+            'leftMargin'   => 0,
+            'rightMargin'  => 0,
+	];
+
 	// Assuming that people don't want to specify the paper size using the absolute coordinates
 	// allow a couple of options:
 	// orientation can be 'portrait' or 'landscape'
@@ -39,7 +51,7 @@ function Cezpdf($paper='a4',$orientation='portrait'){
 	// 
 	// Now you may also pass a 2 values array containing the page width and height in centimeters
 	// -------------------------
-
+	
 	if (!is_array($paper)){
 		switch (strtoupper($paper)){
 			case '4A0': {$size = array(0,0,4767.87,6740.79); break;}
@@ -111,7 +123,8 @@ function Cezpdf($paper='a4',$orientation='portrait'){
 			$size[3] = ( $paper[1] / 2.54 ) * 72;
 		}
 	}
-	$this->Cpdf($size);
+	//$this->Cpdf($size);
+	parent::__construct($size);
 	$this->ez['pageWidth']=$size[2];
 	$this->ez['pageHeight']=$size[3];
 	
@@ -127,6 +140,11 @@ function Cezpdf($paper='a4',$orientation='portrait'){
 	$this->ezPages[1]=$this->getFirstPageId();
 	$this->ezPageCount=1;
 }
+
+// PHP 4-style alias
+//function Cezpdf($paper='a4', $orientation='portrait'){
+//  $this->__construct($paper, $orientation);
+//}
 
 // ------------------------------------------------------------------------------
 // 2002-07-24: Nicola Asuni (info@tecnick.com)
@@ -645,19 +663,22 @@ function ezTable(&$data,$cols='',$title='',$options=''){
   if (!is_array($data)){
     return;
   }
-  
-  if (!is_array($cols)){
+
+ if (!is_array($cols)) {
     // take the columns from the first row of the data set
-    reset($data);
-    list($k,$v)=each($data);
-    if (!is_array($v)){
-      return;
+    $firstRow = null;
+    foreach ($data as $row) {
+        $firstRow = $row;
+        break;
     }
-    $cols=array();
-    foreach($v as $k1=>$v1){
-      $cols[$k1]=$k1;
+    if (!is_array($firstRow)) {
+        return;
     }
-  }
+    $cols = [];
+    foreach ($firstRow as $k1 => $v1) {
+        $cols[$k1] = $k1;
+    }
+ }
   
   if (!is_array($options)){
     $options=array();

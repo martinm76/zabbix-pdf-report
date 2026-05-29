@@ -161,6 +161,15 @@
         * Went through pull requests, accepted two and declined one. Minor modifications to config.inc.php.dist and README.md
         * Looked through open issues. Closed several and updated those with some relevance still
 
+2026-05-29 Martin Møller <martin.moller@pwc.com> - Update to v2.0.0
+	* This version is a near complete rewrite and aimed at Zabbix versions
+	7.0 onwards. It may work with later 6.x series as well. Older versions
+	should stick to the now legacy branch instead.
+	* Currently the report generates but there are some issues with
+	graphs, hopefully fixed soon.
+	* Upcoming is a switch to a different PDF library to shed the legacy
+	code of ezPDF.
+
 PLANNED:
 	* Look into excluding headlines for empty sections (requires rewriting
 	some parts of the generator code).
