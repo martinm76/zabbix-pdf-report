@@ -1,3 +1,7 @@
+> ⚠️ **This is the legacy brank** for Zabbix 4.0-6.5 and PHP 7.4-8.1.
+> It receives resurity fixes only. For Zabbix 7.0 and newer, use the
+> [`2.x` branch](https://github.com/martinm76/zabbix-pdf-report/tree/2.x). 
+
 zabbix-dynamic-report-generation
 ================================
 Please run ./fixrights.sh after you have checked out this repo. By default, reports and tmp folders will not exist and need to be created.
