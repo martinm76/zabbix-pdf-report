@@ -1,5 +1,5 @@
 > ⚠️ **This is the legacy branch** for Zabbix 4.0-6.5 and PHP 7.4-8.1.
-> It receives resurity fixes only. For Zabbix 7.0 and newer, use the
+> It receives security fixes only. For Zabbix 7.0 and newer, use the
 > [`2.x` branch](https://github.com/martinm76/zabbix-pdf-report/tree/2.x). 
 
 zabbix-dynamic-report-generation
