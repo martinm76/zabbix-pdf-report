@@ -178,6 +178,10 @@
 	* chooser.php now correctly shows all old reports you have access to
 	* Various minor code tweaks
 
+2023-05-29 Martin Møller <martin.moller@pwc.com> - Update to v2.1.1
+	* JavaScript libraries updated as much as can reasonable be allowed
+	* jQuery 3.5.1 -> 3.7.1, plugins updated where possible
+
 PLANNED:
 	* Look into excluding headlines for empty sections (requires rewriting
 	some parts of the generator code).

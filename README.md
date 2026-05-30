@@ -151,6 +151,23 @@ Known Issues
   `legacy-1.x` branch.
 - **fixrights.sh**: SELinux handling is best-effort and not exhaustive.
 
+### Frontend dependencies
+
+The frontend uses jQuery 3.7.1 plus the following plugins:
+
+- **tablesorter** (Mottie) — actively maintained, no concerns.
+- **jquery-validation** — actively maintained, no concerns.
+- **xdan/jquery.datetimepicker** — *unmaintained since 2019*. Still works
+  on jQuery 3.x but will likely break on a future jQuery 4 upgrade.
+  Slated for replacement with [flatpickr](https://flatpickr.js.org/) or
+  similar when next the UI is touched.
+- **Select2 4.0.13** — quasi-maintained, releases extremely slow. Works
+  on jQuery 3.x. Slated for eventual replacement with [Tom Select] or
+  [Choices.js].
+
+These are not urgent — the report UI is stable — but contributors looking
+for self-contained projects could pick either migration up.
+
 Troubleshooting
 ---------------
 ### Graph time ranges appear offset
