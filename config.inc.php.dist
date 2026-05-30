@@ -29,6 +29,11 @@ $version         = '2.0.0';
 // ---------------------------------------------------------------------
 
 // Base URL of your Zabbix frontend (trailing slash optional).
+// Examples:
+//   $z_server = 'https://zabbix.example.com/';        // domain root, default port
+//   $z_server = 'https://zabbix.example.com/zabbix/'; // subdirectory install
+//   $z_server = 'http://192.168.1.10:8080/';          // non-standard port
+//   $z_server = 'http://your-zabbix-host:8080/zabbix/'
 $z_server = 'http://localhost/zabbix/';
 
 // Authentication mode for the JSON-RPC API:

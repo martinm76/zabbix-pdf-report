@@ -170,6 +170,14 @@
 	* Upcoming is a switch to a different PDF library to shed the legacy
 	code of ezPDF.
 
+2023-05-29 Martin Møller <martin.moller@pwc.com> - Update to v2.1.0
+	* fixrights.sh has been updated to use ss instead of netstat and
+	should be more likely to find your web process. You can now specify
+	the port it should look at (e.g. 8080) - default is 80.
+	* Graphs now render correctly on Zabbix 6.4 and newer
+	* chooser.php now correctly shows all old reports you have access to
+	* Various minor code tweaks
+
 PLANNED:
 	* Look into excluding headlines for empty sections (requires rewriting
 	some parts of the generator code).

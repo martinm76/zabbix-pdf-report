@@ -44,8 +44,11 @@ final class ZabbixGraph
         $url = $this->serverUrl . 'chart2.php?' . http_build_query([
             'graphid'    => $graphId,
             'profileIdx' => 'web.charts.filter',
-            'from'       => $startTime,        // Zabbix 7.x accepts Unix timestamps directly
-            'to'         => $endTime,
+            // chart2.php uses the frontend time-range parser, which rejects
+            // raw Unix timestamps. Format as 'Y-m-d H:i:s' so it works on
+            // Zabbix 5.4, 6.x and 7.x alike.
+            'from'       => date('Y-m-d H:i:s', $startTime),
+            'to'         => date('Y-m-d H:i:s', $endTime),
             'width'      => $width,
             'height'     => $height,
         ]);
@@ -61,8 +64,8 @@ final class ZabbixGraph
         $url = $this->serverUrl . 'chart.php?' . http_build_query([
             'itemids'    => [$itemId],
             'profileIdx' => 'web.item.graph.filter',
-            'from'       => $startTime,
-            'to'         => $endTime,
+            'from'       => date('Y-m-d H:i:s', $startTime),
+            'to'         => date('Y-m-d H:i:s', $endTime),
             'width'      => $width,
             'height'     => $height,
         ]);

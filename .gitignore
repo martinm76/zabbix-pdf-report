@@ -1,0 +1,18 @@
+# Composer
+/vendor/
+
+# Local config (never commit credentials)
+/config.inc.php
+
+# Runtime output
+/tmp/*
+!/tmp/.gitkeep
+/reports/*
+!/reports/.gitkeep
+
+# IDE / editor
+/.idea/
+/.vscode/
+*.swp
+*.swo
+.DS_Store

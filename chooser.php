@@ -143,9 +143,8 @@ if ($z_auth_mode === 'token') {
 }
 
 //fetch graph data host
-$hosts       = ZabbixAPI::fetch_array('host','get',array('output'=>array('hostid','name'),'sortfield'=>'host','with_graphs'=>'1','sortfield'=>'name'))
+$hosts       = ZabbixAPI::fetch_array('host','get',array('output'=>array('hostid','name'),'with_graphs'=>true,'sortfield'=>'name'))
 	or die('Unable to get hosts: '.print_r(ZabbixAPI::getLastError(),true));
-// OLD: the `if ($zabbix_version >= 6.2 ) { ... } else { ... }` block
 
 // NEW (the 6.2+ branch only, plus the 7.x removal of `real_hosts` / `with_graphs`
 // on hostgroup.get is already handled because we filter manually):
@@ -168,7 +167,6 @@ foreach ($host_groups as $group) {
 }
 $host_groups = $filtered_host_groups;
 
-}
 ZabbixAPI::logout($z_server,$z_user,$z_pass)
 	or die('Unable to logout: '.print_r(ZabbixAPI::getLastError(),true));
 

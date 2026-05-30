@@ -2,7 +2,13 @@
 /**
  * zabbix-pdf-report — 2.x
  *
- * Zabbix JSON-RPC client, rewritten for Zabbix 7.0+ and PHP 8.0+.
+ * Zabbix JSON-RPC client for Zabbix 6.4+ and PHP 8.0+.
+ *
+ *   - Authenticates with HTTP `Authorization: Bearer <token>` header
+ *     (added in Zabbix 6.4; the legacy `"auth"` JSON-RPC field was
+ *     deprecated in 7.0 and removed in 7.2, so 2.x never emits it).
+ *   - Refuses to run against Zabbix < 6.4 with a clear error pointing
+ *     at the legacy-1.x branch.
  *
  * Major changes vs. 1.x:
  *   - Authenticates with HTTP `Authorization: Bearer <token>` header
@@ -10,8 +16,6 @@
  *      deprecated in 7.0, so 2.x never emits it).
  *   - Supports pre-created API tokens (recommended) in addition to
  *     username/password login.
- *   - Refuses to run against Zabbix < 7.0 with a clear error pointing
- *     users at the legacy-1.x branch.
  *   - PHP 8 clean: strict types, typed properties, no deprecated calls.
  *   - Throws ZabbixApiException on transport/RPC errors; the legacy
  *     getLastError() accessor is retained for callers that prefer
@@ -33,7 +37,7 @@ final class ZabbixAPI
 {
     public const PHPAPI_VERSION       = '2.0.0';
     public const ZABBIX_API_ENDPOINT  = 'api_jsonrpc.php';
-    public const MIN_ZABBIX_VERSION   = '7.0';
+    public const MIN_ZABBIX_VERSION   = '6.4';
 
     /** Singleton instance. */
     private static ?ZabbixAPI $instance = null;
@@ -408,16 +412,16 @@ final class ZabbixAPI
 
     private function ensureVersionSupported(): void
     {
-        $version = $this->apiVersion ??= (string) $this->call('apiinfo.version', [], unauthenticated: true);
-        if (version_compare($version, self::MIN_ZABBIX_VERSION, '<')) {
-            throw new ZabbixApiException(sprintf(
-                'zabbix-pdf-report 2.x requires Zabbix %s or newer, got %s. '
-                . 'For older Zabbix versions please use the legacy-1.x branch: '
-                . 'https://github.com/martinm76/zabbix-pdf-report/tree/legacy-1.x',
-                self::MIN_ZABBIX_VERSION,
-                $version
-            ));
-        }
+	    $version = $this->apiVersion ??= (string) $this->call('apiinfo.version', [], unauthenticated: true);
+	    if (version_compare($version, self::MIN_ZABBIX_VERSION, '<')) {
+    		throw new RuntimeException(sprintf(
+        	'This branch (2.x) requires Zabbix %s or newer; the server reports %s. '
+        	. 'For Zabbix 6.0 or older, use the legacy-1.x branch: '
+        	. 'https://github.com/martinm76/zabbix-dynamic-report-generation/tree/legacy-1.x',
+        	self::MIN_ZABBIX_VERSION,
+        	$version
+    		));
+	}
     }
 
     private static function normalizeUrl(string $url): string

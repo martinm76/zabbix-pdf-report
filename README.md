@@ -10,12 +10,20 @@ Status
 Actively maintained. Recently modernised for PHP 8.x — see
 "PHP 8 Compatibility" below.
 
+Compatibility Matrix
+--------------------
+| zabbix-pdf-report | Zabbix     | PHP       | Branch       | Status        |
+|-------------------|------------|-----------|--------------|---------------|
+| 2.x               | 6.4 – 7.4  | 8.0 – 8.3 | `2.x` (main) | Active        |
+| 1.x               | 4.0 – 6.4  | 7.4 – 8.1 | `legacy-1.x` | Security only |
+| 0.x               | ≤ 3.4      | 5.x – 7.x | (unmaintained) | Archived    |
+
 Quick Start
 -----------
 1. Clone the repository.
-2. Run `./fixrights.sh` to create and permission the `reports/` and `tmp/`
-   directories. By default these do not exist in the repo and need to be
-   writable by the webserver.
+2. Run `./fixrights.sh` or `./fixrights.sh <port>` to create and permission 
+   the `reports/` and `tmp/` directories. By default these do not exist in 
+   the repo and need to be writable by the webserver.
 3. Copy `config.inc.php.dist` to `config.inc.php` and edit it for your
    environment (Zabbix URL, API user, company branding, etc.). The file is
    fairly well documented internally.
@@ -32,8 +40,8 @@ Requirements
 ------------
 - **PHP 8.0 or newer** (tested on PHP 8.1 and 8.2; legacy PHP 7.4 may still
   work but is no longer the supported target — see "PHP 8 Compatibility").
-- A reachable Zabbix server with API access. Tested against Zabbix 5.x and
-  6.x; 7.x support is in progress (see "Known Issues").
+- A reachable Zabbix server with API access. legacy-1.x is tested against 
+  Zabbix 5.x and 6.x; 7.x support is in progress in 2.x branch (see "Known Issues").
 - The following PHP extensions:
     - `php-curl`
     - `php-json` (built in on PHP 8+, but some distros still package it
@@ -136,10 +144,21 @@ Known Issues
   and require relative time strings (`now-1d`, `now`) or `YYYY-MM-DD
   HH:MM:SS` absolute datetimes. Reports against newer Zabbix versions may
   show "Field 'from' is not correct: a time range is expected." in place
-  of graphs. A fix is in progress.
-- **Zabbix 7.x**: not yet fully tested. API authentication and graph
-  endpoints may need adjustment.
+  of graphs. This ought to be fixed from 2.1.0 onwards.
+- **Zabbix 6.4 or newer.** Tested on 7.0 LTS (currently 7.0.25). 6.4 and 7.2+
+  are expected to work and use the same Bearer-token authentication and the
+  same chart endpoint format. For Zabbix 6.0 or earlier, use the
+  `legacy-1.x` branch.
 - **fixrights.sh**: SELinux handling is best-effort and not exhaustive.
+
+Troubleshooting
+---------------
+### Graph time ranges appear offset
+
+Graph URLs sent to `chart2.php` / `chart.php` use PHP's local timezone for
+the `from` / `to` parameters. If your PHP host and Zabbix server are in
+different timezones, set `date.timezone` in `php.ini` to match the Zabbix
+server timezone, or graphs will be offset by the timezone delta.
 
 Discussion / History
 --------------------
