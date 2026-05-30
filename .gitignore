@@ -1,5 +1,5 @@
 # Composer
-/vendor/
+#/vendor/
 
 # Local config (never commit credentials)
 /config.inc.php
