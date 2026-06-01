@@ -170,7 +170,7 @@
 	* Upcoming is a switch to a different PDF library to shed the legacy
 	code of ezPDF.
 
-2023-05-29 Martin Møller <martin.moller@pwc.com> - Update to v2.1.0
+2026-05-29 Martin Møller <martin.moller@pwc.com> - Update to v2.1.0
 	* fixrights.sh has been updated to use ss instead of netstat and
 	should be more likely to find your web process. You can now specify
 	the port it should look at (e.g. 8080) - default is 80.
@@ -178,13 +178,24 @@
 	* chooser.php now correctly shows all old reports you have access to
 	* Various minor code tweaks
 
-2023-05-29 Martin Møller <martin.moller@pwc.com> - Update to v2.1.1
+2026-05-29 Martin Møller <martin.moller@pwc.com> - Update to v2.1.1
 	* JavaScript libraries updated as much as can reasonable be allowed
 	* jQuery 3.5.1 -> 3.7.1, plugins updated where possible
 
+2026-06-01 Martin Møller <martin.moller@pwc.com> - Update to v2.1.5
+	* Select2.js/css rolled back to 3.5.1 as it was looking bad and the
+	selector was not getting its correct size either. The 4.0.13 version
+	is available in the js/ and css/ folders, if you want to try your hand
+	at them.
+	* Code added to flatten PNG files with transparency if used at the PDF
+	logo (can potentially be called elsewhere, but that was where I had an
+	issue. See commit notes.
+	* More control over placement and size of PDF logo. See
+	config.inc.php.dist
+	* I believe as part of the rewrite, headlines for empty sections was
+	also eliminated. If you find some, let me know.
+
 PLANNED:
-	* Look into excluding headlines for empty sections (requires rewriting
-	some parts of the generator code).
 	* HTML data for triggers/acknowledgements with fuller details. Right
 	now only the subject is shown in the PDF (or the message in the case
 	of acknowledgements). The reports would tend to get pretty big if the

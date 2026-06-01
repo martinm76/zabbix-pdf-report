@@ -161,12 +161,18 @@ The frontend uses jQuery 3.7.1 plus the following plugins:
   on jQuery 3.x but will likely break on a future jQuery 4 upgrade.
   Slated for replacement with [flatpickr](https://flatpickr.js.org/) or
   similar when next the UI is touched.
+**Rolled back to 3.5.1:**
 - **Select2 4.0.13** — quasi-maintained, releases extremely slow. Works
   on jQuery 3.x. Slated for eventual replacement with [Tom Select] or
   [Choices.js].
 
 These are not urgent — the report UI is stable — but contributors looking
 for self-contained projects could pick either migration up.
+
+Note on Select2
+---------------
+**Select2 version note:** This project uses Select2 3.5.1 deliberately. Upgrading to 4.x is possible but requires either the theme: 'classic' option or a custom override stylesheet to retain the current visual appearance, since 4.x ships with a flatter default look. the 4.0.13 versions are available with explicit version in js/ and css/ if anyone wants to give it a go to make it look good. 
+If upgrading, also note that nginx proxy and possible other frontends may serve cached versions of CSS/JS — bump cache-busting query strings on the <link>/<script> tags or purge nginx cache to load the new versions if so.
 
 Troubleshooting
 ---------------

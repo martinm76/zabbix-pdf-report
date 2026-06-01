@@ -294,11 +294,11 @@ $pdf->selectFont($mainFont);
 if (file_exists($pdf_logo)){
   // $pdf->addPngFromFile($pdf_logo,50,$pdf->y,200,0);
   placeLogo($pdf, $pdf_logo, [
-    'maxW'     => 300,
-    'maxH'     => 120,
-    'marginX'  => 30,
-    'marginY'  => 60,
-    'position' => 'bottom-left',
+    'maxW'     => $maxWidth,
+    'maxH'     => $maxHeight,
+    'marginX'  => $offsetX,
+    'marginY'  => $offsetY,
+    'position' => $anchor,
 ]);
 
   if ($debug) {

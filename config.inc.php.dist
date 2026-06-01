@@ -115,6 +115,13 @@ $pdf_logo          = './images/general/zabbix.png';
 $company_name      = 'YourCompany Name';
 $hide_company_name = false;
 
+// Placement of PDF Logo:
+$maxWidth  = 300;
+$maxHeight = 120;
+$offsetX   = 30; # How far in on the page should be push the logo
+$offsetY   = 40; # How far up/down should be push the logo?
+$anchor    = 'bottom-left'; # What location on the page should be use as basis for the offsets?
+
 // ---------------------------------------------------------------------
 // Derived values — DO NOT EDIT BELOW THIS LINE
 // ---------------------------------------------------------------------
