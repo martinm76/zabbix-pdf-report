@@ -22,7 +22,7 @@ $user_login      = 1;
 // values from this file (handy for cron-driven email reports).
 $allow_localhost = 1;
 
-$version         = '2.1.0';
+$version         = '2.1.5';
 
 // ---------------------------------------------------------------------
 // Zabbix server connection

@@ -292,8 +292,15 @@ $pdf->selectFont($mainFont);
 
 // modified to use the local file if it can
 if (file_exists($pdf_logo)){
-  //$pdf->addPngFromFile($pdf_logo,199,$pdf->y-375,200,0);
-  $pdf->addPngFromFile($pdf_logo,50,$pdf->y,200,0);
+  // $pdf->addPngFromFile($pdf_logo,50,$pdf->y,200,0);
+  placeLogo($pdf, $pdf_logo, [
+    'maxW'     => 300,
+    'maxH'     => 120,
+    'marginX'  => 30,
+    'marginY'  => 60,
+    'position' => 'bottom-left',
+]);
+
   if ($debug) {
     echo "$pdf_logo written to PDF-file ...<br/>";
   }

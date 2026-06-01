@@ -20,6 +20,174 @@ require_once __DIR__ . '/ZabbixGraph.php';
 // Small utilities
 // ---------------------------------------------------------------------
 
+/**
+ * Place a PNG logo onto a Cezpdf page with auto-scaling and format normalisation.
+ *
+ * Options (all optional):
+ *   maxW      float   max width in PDF points          (default 150)
+ *   maxH      float   max height in PDF points         (default 60)
+ *   margin    float   fallback margin for both axes    (default 30)
+ *   marginX   float   horizontal margin from page edge (default = margin)
+ *   marginY   float   vertical margin from page edge   (default = margin)
+ *   position  string  'bottom-left' (default), 'bottom-right', 'top-left', 'top-right'
+ *   cacheDir  string  where to store normalised PNGs   (default sys_get_temp_dir())
+ *
+ * @return bool  true if placed, false on error (logged).
+ */
+function placeLogo($pdf, string $logoPath, array $opts = []): bool
+{
+    $maxW     = (float)  ($opts['maxW']     ?? 150);
+    $maxH     = (float)  ($opts['maxH']     ?? 60);
+    $margin   = (float)  ($opts['margin']   ?? 30);
+    $marginX  = (float)  ($opts['marginX']  ?? $margin);
+    $marginY  = (float)  ($opts['marginY']  ?? $margin);
+    $position = (string) ($opts['position'] ?? 'bottom-left');
+    $cacheDir = (string) ($opts['cacheDir'] ?? sys_get_temp_dir());
+
+    // --- Sanity checks ---
+    if (!is_readable($logoPath)) {
+        error_log("placeLogo: cannot read logo file: $logoPath");
+        return false;
+    }
+
+    $info = @getimagesize($logoPath);
+    if ($info === false || $info[2] !== IMAGETYPE_PNG) {
+        error_log("placeLogo: not a valid PNG: $logoPath");
+        return false;
+    }
+
+    [$srcW, $srcH] = $info;
+    if ($srcW <= 0 || $srcH <= 0) {
+        error_log("placeLogo: zero-dimension PNG: $logoPath");
+        return false;
+    }
+
+  // Do we need to remove tranparency?
+  $renderPath = $logoPath;
+  $needsFlattening = false;
+  $colourType = -1;
+  $bitDepth   = -1;
+
+  $fh = @fopen($logoPath, 'rb');
+  if ($fh !== false) {
+    $header = fread($fh, 26);
+    fclose($fh);
+    if (strlen($header) >= 26) {
+        $bitDepth   = ord($header[24]);
+        $colourType = ord($header[25]);
+        // ezPDF (R&OS variant) accepts: greyscale (0), RGB (2), palette (3).
+        // It rejects alpha-channel types (4 = grey+alpha, 6 = RGBA).
+        // Anything else, or non-8-bit, also gets flattened to be safe.
+        if (in_array($colourType, [4, 6], true) || $bitDepth !== 8) {
+            $needsFlattening = true;
+        }
+    }
+  }
+
+  if ($needsFlattening) {
+    if (!is_dir($cacheDir)) {
+        @mkdir($cacheDir, 0755, true);
+    }
+    $cacheKey = md5($logoPath . '|' . filemtime($logoPath));
+    $cached   = $cacheDir . DIRECTORY_SEPARATOR . 'logo-' . $cacheKey . '.png';
+
+    if (!is_file($cached)) {
+        if (!flattenPngForEzpdf($logoPath, $cached)) {
+            error_log("placeLogo: PNG flattening failed for $logoPath; using original");
+        }
+    }
+    if (is_file($cached)) {
+        $renderPath = $cached;
+    }
+  }
+
+    // --- Calculate scaled dimensions, preserving aspect ratio, never upscaling ---
+    $scale = min($maxW / $srcW, $maxH / $srcH, 1.0);
+    $drawW = $srcW * $scale;
+    $drawH = $srcH * $scale;
+
+    // --- Calculate position; ezPDF origin is bottom-left ---
+    $pageW = $pdf->ez['pageWidth']  ?? 595;   // A4 portrait default
+    $pageH = $pdf->ez['pageHeight'] ?? 842;
+
+    switch ($position) {
+        case 'bottom-right':
+            $x = $pageW - $drawW - $marginX;
+            $y = $marginY;
+            break;
+        case 'top-left':
+            $x = $marginX;
+            $y = $pageH - $drawH - $marginY;
+            break;
+        case 'top-right':
+            $x = $pageW - $drawW - $marginX;
+            $y = $pageH - $drawH - $marginY;
+            break;
+        case 'bottom-left':
+        default:
+            $x = $marginX;
+            $y = $marginY;
+            break;
+    }
+
+    // --- Debug log (remove or comment out once placement is confirmed working) ---
+    error_log(sprintf(
+        'placeLogo: src=%s (%dx%d, ct=%d, bd=%d) render=%s draw=%.1fx%.1f at (%.1f,%.1f) page=%dx%d',
+        $logoPath, $srcW, $srcH, $colourType, $bitDepth,
+        $renderPath, $drawW, $drawH, $x, $y, $pageW, $pageH
+    ));
+
+    // --- Place it ---
+    $pdf->addPngFromFile($renderPath, $x, $y, $drawW, $drawH);
+
+    if (!empty($pdf->messages)) {
+        error_log('placeLogo: ezPDF messages after addPngFromFile: ' . $pdf->messages);
+    }
+
+    return true;
+}
+
+/**
+ * Re-encode any PNG to 8-bit RGB (no alpha) by flattening transparency
+ * onto a background colour. Required because the bundled ezPDF/R&OS PDF
+ * library supports PNG transparency only for palette images, not for
+ * true-colour alpha channels.
+ */
+function flattenPngForEzpdf(string $src, string $dst, array $bgRgb = [255, 255, 255]): bool
+{
+    if (!function_exists('imagecreatefrompng')) {
+        error_log('flattenPngForEzpdf: GD extension not available');
+        return false;
+    }
+
+    $im = @imagecreatefrompng($src);
+    if ($im === false) {
+        error_log("flattenPngForEzpdf: imagecreatefrompng failed: $src");
+        return false;
+    }
+
+    $w = imagesx($im);
+    $h = imagesy($im);
+
+    // Opaque background canvas in the requested colour.
+    $canvas = imagecreatetruecolor($w, $h);
+    $bg = imagecolorallocate($canvas, $bgRgb[0], $bgRgb[1], $bgRgb[2]);
+    imagefilledrectangle($canvas, 0, 0, $w, $h, $bg);
+
+    // Composite source over the background; alpha pixels blend with bg.
+    imagealphablending($canvas, true);
+    imagecopy($canvas, $im, 0, 0, 0, 0, $w, $h);
+
+    // Save as RGB (no alpha channel at all).
+    imagesavealpha($canvas, false);
+    $ok = imagepng($canvas, $dst);
+
+    imagedestroy($im);
+    imagedestroy($canvas);
+
+    return $ok !== false;
+}
+
 function tempdir(?string $dir = null, string $prefix = 'zabbix_report_'): string
 {
     $tempfile = tempnam($dir ?? sys_get_temp_dir(), $prefix);
