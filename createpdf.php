@@ -206,7 +206,7 @@ function sanitiseString($string, $wordLimit = 0){
 
 if ($reporttype == 'host') {
 	if (!is_numeric($hostid)) { echo "ERROR: Need hostid for host report!</br>\n"; exit; }
-	$hosts  = ZabbixAPI::fetch_array('host','get',array('output'=>array('hostid','name'),'with_graphs'=>true,'hostids'=>$hostid))
+	$hosts  = ZabbixAPI::fetch_array('host','get',array('output'=>array('hostid','name'),'hostids'=>$hostid))
 		or die('Unable to get hosts: '.print_r(ZabbixAPI::getLastError(),true));
 	//var_dump($hosts);
 	// Get name to be used in PLACEHOLDER-part of filename
@@ -216,7 +216,7 @@ if ($reporttype == 'host') {
 }
 elseif ($reporttype == 'hostgroup') {
 	if (!is_numeric($groupid)) { echo "ERROR: Need groupid for group report!</br>\n"; exit; }
-	$hosts  = ZabbixAPI::fetch_array('host','get',array('output'=>array('hostid','name'),'with_graphs'=>true,'groupids'=>$groupid))
+	$hosts  = ZabbixAPI::fetch_array('host','get',array('output'=>array('hostid','name'),'groupids'=>$groupid))
 		or die('Unable to get hosts: '.print_r(ZabbixAPI::getLastError(),true));
 	//var_dump($hosts);
 	$hostgroupname = ZabbixAPI::fetch_array('hostgroup','get',array('output'=>array('name'),'groupids'=>$groupid))
@@ -321,11 +321,23 @@ $height = $pdf->getFontHeight($size);
 $textOptions = array('justification'=>'full');
 $collecting=0;
 $code='';
+$prevline = '';
+
+// Strip trailing #NP markers entirely — they only create blank pages at the end
+while (count($data) > 0 && chop(end($data)) === '#NP') {
+    array_pop($data);
+}
 
 foreach ($data as $key => $line){
   // go through each line, showing it as required, if it is surrounded by '<>' then
   // assume that it is a title
   $line=chop($line);
+
+  // Skip consecuty #NP markes - callopse them info a single page break
+  if ($line === '#NP' && $prevline === '#NP') {
+	  continue;
+  }
+
   if (strlen($line) && $line[0]=='#'){
     // comment, or new page request
     switch($line){

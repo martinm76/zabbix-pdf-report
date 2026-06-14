@@ -195,6 +195,10 @@
 	* I believe as part of the rewrite, headlines for empty sections was
 	also eliminated. If you find some, let me know.
 
+2026-06-01 Martin Møller <martin.moller@pwc.com> - Update to v2.1.6
+	* Removed the requirement for hosts to have graphs available to show up
+	* Cleanup of empty pages at the end of reports 
+
 PLANNED:
 	* HTML data for triggers/acknowledgements with fuller details. Right
 	now only the subject is shown in the PDF (or the message in the case

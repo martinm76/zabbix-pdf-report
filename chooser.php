@@ -143,7 +143,7 @@ if ($z_auth_mode === 'token') {
 }
 
 //fetch graph data host
-$hosts       = ZabbixAPI::fetch_array('host','get',array('output'=>array('hostid','name'),'with_graphs'=>true,'sortfield'=>'name'))
+$hosts       = ZabbixAPI::fetch_array('host','get',array('output'=>array('hostid','name'),'sortfield'=>'name'))
 	or die('Unable to get hosts: '.print_r(ZabbixAPI::getLastError(),true));
 
 // NEW (the 6.2+ branch only, plus the 7.x removal of `real_hosts` / `with_graphs`
