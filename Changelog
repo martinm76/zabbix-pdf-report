@@ -195,9 +195,16 @@
 	* I believe as part of the rewrite, headlines for empty sections was
 	also eliminated. If you find some, let me know.
 
-2026-06-01 Martin Møller <martin.moller@pwc.com> - Update to v2.1.6
+2026-06-14 Martin Møller <martin.moller@pwc.com> - Update to v2.1.6
 	* Removed the requirement for hosts to have graphs available to show up
 	* Cleanup of empty pages at the end of reports 
+
+2026-06-15 Martin Møller <martin.moller@pwc.com> - Update to v2.2.0
+	* Print your version of Zabbix in the chooser
+	* For Admin user, show all old reports, also for deleted hosts and
+	host groups
+	* Fix most if not all edge cases of graphs not rendering (i.e. no
+	values, null, stuff like that)
 
 PLANNED:
 	* HTML data for triggers/acknowledgements with fuller details. Right

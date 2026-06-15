@@ -101,7 +101,7 @@ function ListOldReports(string $dir): void
         $name  = substr(rawurldecode($fname), 0, -4);
         $url   = rawurlencode($fname);
 
-        if (isset($known[mb_strtolower($name)])) {
+        if (isset($known[mb_strtolower($name)]) || ($z_user == 'Admin')) {
             $safeName = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
             echo "<tr><td>$stamp</td><td align=\"left\"><a href=\"reports/$url\">$safeName</a></td></tr>\n";
         }

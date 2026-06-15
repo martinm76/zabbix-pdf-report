@@ -122,7 +122,6 @@ header( 'Content-type: text/html; charset=utf-8' );
 <table class="maxwidth page_header" cellspacing="0" cellpadding="5"><tr><td class="page_header_l"><a class="image" href="http://www.zabbix.com/" target="_blank"><div class="zabbix_logo">&nbsp;</div></a></td><td class="maxwidth page_header_r">&nbsp;</td></tr></table>
 <br/><br/>
 <center><h1>Generate PDF Report</h1></center>
-<br/>
 <?php
 // ERROR REPORTING
 error_reporting(E_ALL);
@@ -175,6 +174,8 @@ ZabbixAPI::logout($z_server,$z_user,$z_pass)
 
 // Form dropdown boxes from Zabbix API Data
 ?>
+<center><h2>Zabbix version: <?= htmlspecialchars(ZabbixAPI::getApiVersion()) ?></h2></center>
+<br/>
 <center>
 <form class="cmxform" id="ReportForm" name="ReportForm" action='createpdf.php' method='GET'>
 <table border="1" rules="NONE" frame="BOX" width="600" cellpadding="10">
@@ -251,7 +252,7 @@ ReadArray($host_groups);
 </p>
 </td><td valign="bottom" align="middle">
 <input type='submit' value='Generate'>
-<span class="smalltext"><input type='checkbox' name='debug'>Debug</span>
+<span class="smalltext"><input type='checkbox' name='debug'> Debug</span>
 <p><center>Version: <?php echo($version); ?></center></p>
 </td></tr>
 </table>

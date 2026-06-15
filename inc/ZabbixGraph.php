@@ -37,40 +37,147 @@ final class ZabbixGraph
     }
 
     /**
-     * Render a regular graph (chart2.php) to disk.
-     */
-    public function saveGraph(int $graphId, int $startTime, int $endTime, int $width, int $height, string $outFile): bool
-    {
-        $url = $this->serverUrl . 'chart2.php?' . http_build_query([
-            'graphid'    => $graphId,
-            'profileIdx' => 'web.charts.filter',
-            // chart2.php uses the frontend time-range parser, which rejects
-            // raw Unix timestamps. Format as 'Y-m-d H:i:s' so it works on
-            // Zabbix 5.4, 6.x and 7.x alike.
-            'from'       => date('Y-m-d H:i:s', $startTime),
-            'to'         => date('Y-m-d H:i:s', $endTime),
-            'width'      => $width,
-            'height'     => $height,
-        ]);
-        return $this->fetchToFile($url, $outFile);
+ * Inspect history values for one or more items over a time range.
+ * Returns ['min' => float|null, 'max' => float|null, 'hasData' => bool].
+ */
+private function getValueRange(array $itemIds, int $startTime, int $endTime): array
+{
+    if (empty($itemIds)) {
+        return ['min' => null, 'max' => null, 'hasData' => false];
     }
 
-    /**
-     * Render an item history graph (chart.php) to disk.
-     */
-    public function saveItemGraph(int $itemId, int $startTime, int $endTime, int $width, int $height, string $outFile): bool
-    {
-        // chart.php expects itemids as an indexed array: itemids[0]=ID
-        $url = $this->serverUrl . 'chart.php?' . http_build_query([
-            'itemids'    => [$itemId],
-            'profileIdx' => 'web.item.graph.filter',
-            'from'       => date('Y-m-d H:i:s', $startTime),
-            'to'         => date('Y-m-d H:i:s', $endTime),
-            'width'      => $width,
-            'height'     => $height,
-        ]);
-        return $this->fetchToFile($url, $outFile);
+    // Fetch each item's value_type (needed for history.get)
+    $items = ZabbixAPI::fetch_array('item', 'get', [
+        'itemids' => $itemIds,
+        'output'  => ['itemid', 'value_type'],
+    ]);
+
+    $globalMin = null;
+    $globalMax = null;
+    $hasData   = false;
+
+    if (!is_array($items)) {
+        return ['min' => null, 'max' => null, 'hasData' => false];
     }
+
+    foreach ($items as $item) {
+        $valueType = (int)$item['value_type'];
+        // Only numeric types: 0=float, 3=unsigned
+        if ($valueType !== 0 && $valueType !== 3) {
+            continue;
+        }
+
+        $history = ZabbixAPI::fetch_array('history', 'get', [
+            'itemids'   => [$item['itemid']],
+            'history'   => $valueType,
+            'time_from' => $startTime,
+            'time_till' => $endTime,
+            'output'    => ['value'],
+        ]);
+
+        if (!is_array($history) || empty($history)) {
+            continue;
+        }
+
+        $hasData = true;
+        foreach ($history as $row) {
+            $v = (float)$row['value'];
+            if ($globalMin === null || $v < $globalMin) $globalMin = $v;
+            if ($globalMax === null || $v > $globalMax) $globalMax = $v;
+        }
+    }
+
+    return ['min' => $globalMin, 'max' => $globalMax, 'hasData' => $hasData];
+}
+
+/**
+ * Decide whether forced Y-axis bounds are needed to avoid the
+ * "Y axis MAX value must be greater than Y axis MIN value" error.
+ * Returns chart URL parameters to merge in (or empty array).
+ */
+private function forcedYBoundsIfNeeded(array $range): array
+{
+    // If we have data and there's actual variation, no override needed
+    if ($range['hasData'] && $range['min'] !== $range['max']) {
+        return [];
+    }
+
+    if (!$range['hasData'] || $range['max'] === null) {
+        // No data at all — force 0 to 1
+        $yMin = 0;
+        $yMax = 1;
+    } else {
+        // All values identical
+        $value = $range['max'];
+        $yMin  = ($value < 0) ? $value - 1 : 0;
+        $yMax  = $value + 1;
+    }
+
+    return [
+        'ymin_type' => 1,    // 1 = fixed
+        'yaxismin'  => $yMin,
+        'ymax_type' => 1,
+        'yaxismax'  => $yMax,
+    ];
+}
+
+/**
+ * Render a regular graph (chart2.php) to disk.
+ */
+public function saveGraph(int $graphId, int $startTime, int $endTime, int $width, int $height, string $outFile): bool
+{
+    // Look up items belonging to this graph
+    $graphs = ZabbixAPI::fetch_array('graph', 'get', [
+        'graphids'    => [$graphId],
+        'selectItems' => ['itemid'],
+        'output'      => ['graphid'],
+    ]);
+
+    $itemIds = [];
+    if (is_array($graphs) && !empty($graphs[0]['items'])) {
+        foreach ($graphs[0]['items'] as $i) {
+            $itemIds[] = $i['itemid'];
+        }
+    }
+
+    $range = $this->getValueRange($itemIds, $startTime, $endTime);
+    $extraParams = $this->forcedYBoundsIfNeeded($range);
+
+    $params = [
+        'graphid'    => $graphId,
+        'profileIdx' => 'web.charts.filter',
+        'from'       => date('Y-m-d H:i:s', $startTime),
+        'to'         => date('Y-m-d H:i:s', $endTime),
+        'width'      => $width,
+        'height'     => $height,
+    ];
+    $params = array_merge($params, $extraParams);
+
+    $url = $this->serverUrl . 'chart2.php?' . http_build_query($params);
+    return $this->fetchToFile($url, $outFile);
+}
+
+/**
+ * Render an item history graph (chart.php) to disk.
+ */
+public function saveItemGraph(int $itemId, int $startTime, int $endTime, int $width, int $height, string $outFile): bool
+{
+    $range = $this->getValueRange([$itemId], $startTime, $endTime);
+    $extraParams = $this->forcedYBoundsIfNeeded($range);
+
+    $params = [
+        'itemids'    => [$itemId],
+        'profileIdx' => 'web.item.graph.filter',
+        'from'       => date('Y-m-d H:i:s', $startTime),
+        'to'         => date('Y-m-d H:i:s', $endTime),
+        'width'      => $width,
+        'height'     => $height,
+    ];
+    $params = array_merge($params, $extraParams);
+
+    $url = $this->serverUrl . 'chart.php?' . http_build_query($params);
+    return $this->fetchToFile($url, $outFile);
+}
 
     // ------------------------------------------------------------------
     // Internals
